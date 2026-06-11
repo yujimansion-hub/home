@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>創業者ワークスペース | BRIDGE CYCLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400;700&family=Shippori+Mincho+B1:wght@400;500;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root {
+  --navy:     #0D1B2A;
+  --navy-mid: #152336;
+  --navy-lt:  #1E3350;
+  --gold:     #C9A84C;
+  --gold-lt:  #E2C47A;
+  --gold-dim: #8A7040;
+  --cream:    #F7F2E8;
+  --cream-dk: #EDE6D4;
+  --smoke:    #C8BEAA;
+  --warm:     #7A6A52;
+  --rust:     #B85C38;
+  --sage:     #3D5A4C;
+  --white:    #FFFFFF;
+  --green:    #3D7A5E;
+  --sidebar-w: 240px;
+  --r: 8px;
+  --shadow: 0 2px 14px rgba(13,27,42,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--cream);
+  color: var(--navy);
+  font-family: 'Noto Serif JP', serif;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ─── SIDEBAR ─────────────────────────────── */
+#sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.sidebar-logo .brand {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+}
+.sidebar-logo .subtitle {
+  color: var(--smoke);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.sidebar-user {
+  padding: 14px 24px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  color: var(--navy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-name  { font-size: 0.75rem; color: var(--white); font-weight: 700; }
+.user-stage { font-size: 0.6rem;  color: var(--smoke); margin-top: 2px; }
+
+/* PROGRESS JOURNEY */
+.journey {
+  padding: 16px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+.journey-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.journey-item::before {
+  content: '';
+  position: absolute;
+  left: 32px; top: 34px;
+  width: 2px; height: calc(100% - 10px);
+  background: rgba(201,168,76,0.15);
+}
+.journey-item:last-child::before { display: none; }
+.journey-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(201,168,76,0.3);
+  background: var(--navy-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem;
+  color: var(--smoke);
+  flex-shrink: 0;
+  margin-top: 1px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+}
+.journey-item.done   .journey-dot { background: var(--sage);    border-color: var(--sage);   color: white; }
+.journey-item.active .journey-dot { background: var(--gold);    border-color: var(--gold-lt); color: var(--navy); }
+.journey-item.locked .journey-dot { opacity: 0.35; }
+.journey-info { flex: 1; }
+.journey-label { font-size: 0.72rem; color: var(--smoke); transition: color 0.15s; }
+.journey-item.done   .journey-label  { color: rgba(201,168,76,0.7); }
+.journey-item.active .journey-label  { color: var(--gold); font-weight: 700; }
+.journey-item.locked .journey-label  { opacity: 0.4; }
+.journey-sub { font-size: 0.58rem; color: var(--warm); margin-top: 1px; }
+.journey-item:not(.locked):hover .journey-label { color: var(--gold-lt); }
+
+.sidebar-footer {
+  padding: 14px 24px;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  font-size: 0.6rem;
+  color: var(--warm);
+  line-height: 1.8;
+}
+
+/* ─── MAIN ────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid rgba(13,27,42,0.07);
+  padding: 14px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 5px rgba(13,27,42,0.05);
+}
+.topbar-title { font-size: 0.95rem; font-weight: 700; }
+.topbar-stage { font-size: 0.68rem; color: var(--warm); }
+
+.page { display: none; padding: 36px 32px; max-width: 820px; }
+.page.active { display: block; }
+
+/* ─── NEXT ACTION BANNER ─────────────────── */
+.next-banner {
+  background: var(--navy);
+  color: var(--white);
+  border-radius: var(--r);
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.next-icon { font-size: 1.8rem; flex-shrink: 0; }
+.next-label { font-size: 0.62rem; color: var(--gold-lt); letter-spacing: 0.1em; margin-bottom: 4px; }
+.next-text  { font-size: 0.9rem; font-weight: 700; color: var(--white); }
+.next-sub   { font-size: 0.65rem; color: var(--smoke); margin-top: 3px; }
+.next-btn   {
+  margin-left: auto; flex-shrink: 0;
+  background: var(--gold); color: var(--navy);
+  border: none; border-radius: 6px;
+  padding: 10px 18px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.18s;
+}
+.next-btn:hover { background: var(--gold-lt); }
+
+/* ─── BC COMMENT ─────────────────────────── */
+.bc-comment {
+  background: #FFF8E8;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.bc-comment-label { font-size: 0.62rem; color: var(--gold-dim); font-weight: 700; margin-bottom: 5px; letter-spacing: 0.08em; }
+.bc-comment-text  { font-size: 0.8rem; color: var(--navy); line-height: 1.7; }
+
+/* ─── RETURN ALERT ───────────────────────── */
+.return-alert {
+  background: #FFF0EC;
+  border: 1.5px solid var(--rust);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.return-alert-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.return-alert-title { font-size: 0.78rem; font-weight: 700; color: var(--rust); }
+.return-alert-body  { font-size: 0.75rem; color: var(--navy); line-height: 1.7; }
+.return-alert-deadline { font-size: 0.65rem; color: var(--rust); margin-top: 6px; }
+
+/* ─── SECTION HEADER ─────────────────────── */
+.sec-hd { margin-bottom: 24px; }
+.sec-hd h2 { font-size: 1.3rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; font-family: 'Shippori Mincho B1', serif; }
+.sec-hd p  { font-size: 0.78rem; color: var(--warm); line-height: 1.7; }
+
+/* ─── PROGRESS BAR ───────────────────────── */
+.progress-wrap { margin-bottom: 28px; }
+.progress-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.progress-label { font-size: 0.68rem; color: var(--warm); }
+.progress-pct   { font-size: 0.72rem; font-weight: 700; color: var(--navy); }
+.progress-bar { width: 100%; height: 7px; background: var(--cream-dk); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 4px; transition: width 0.4s; }
+
+/* ─── STEP WIZARD ────────────────────────── */
+.step-tabs {
+  display: flex; gap: 0; border-bottom: 2px solid rgba(13,27,42,0.08); margin-bottom: 24px;
+  overflow-x: auto;
+}
+.step-tab {
+  padding: 9px 16px;
+  font-size: 0.7rem;
+  color: var(--warm);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.step-tab.active { color: var(--navy); font-weight: 700; border-bottom-color: var(--gold); }
+.step-tab.done   { color: var(--sage); }
+.step-tab.done::before { content: '✓ '; }
+.step-content { display: none; }
+.step-content.active { display: block; }
+
+/* ─── FORM ───────────────────────────────── */
+.form-row { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--warm);
+  margin-bottom: 6px;
+  letter-spacing: 0.06em;
+}
+.form-label em { color: var(--rust); font-style: normal; margin-left: 3px; }
+.form-hint { font-size: 0.62rem; color: var(--smoke); margin-top: 4px; line-height: 1.6; }
+input[type=text], input[type=email], input[type=tel], input[type=date],
+input[type=number], select, textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid rgba(13,27,42,0.14);
+  border-radius: var(--r);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.8rem;
+  color: var(--navy);
+  background: var(--white);
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+textarea { resize: vertical; min-height: 80px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* RADIO GROUP */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid rgba(13,27,42,0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--navy);
+  background: var(--white);
+  transition: all 0.15s;
+}
+.radio-opt input { display: none; }
+.radio-opt:has(input:checked) { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+
+/* CARD ─ OPTION */
+.option-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.option-card {
+  border: 2px solid rgba(13,27,42,0.12);
+  border-radius: var(--r);
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.option-card:hover { border-color: var(--gold-lt); }
+.option-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+.option-card-icon  { font-size: 1.4rem; margin-bottom: 6px; }
+.option-card-label { font-size: 0.78rem; font-weight: 700; }
+.option-card-desc  { font-size: 0.62rem; color: var(--warm); margin-top: 3px; }
+
+/* BUTTON */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 11px 22px; border-radius: var(--r);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; border: none; transition: all 0.18s;
+}
+.btn-primary { background: var(--navy); color: var(--gold); }
+.btn-primary:hover { background: var(--navy-lt); }
+.btn-gold    { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-lt); }
+.btn-outline { background: transparent; color: var(--navy); border: 1.5px solid rgba(13,27,42,0.2); }
+.btn-outline:hover { border-color: var(--gold); }
+.btn-sm { padding: 7px 14px; font-size: 0.72rem; }
+.btn-full { width: 100%; justify-content: center; }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; }
+
+/* SAVE STATUS */
+.save-status { font-size: 0.65rem; color: var(--smoke); margin-left: auto; }
+.save-status.saved { color: var(--sage); }
+
+/* PANEL */
+.panel {
+  background: var(--white);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.panel-hd {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(13,27,42,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-title { font-size: 0.85rem; font-weight: 700; }
+.panel-body  { padding: 20px; }
+
+/* TASK LIST */
+.task-list { list-style: none; }
+.task-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(13,27,42,0.06);
+  font-size: 0.78rem;
+}
+.task-item:last-child { border-bottom: none; }
+.task-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(13,27,42,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: transparent;
+}
+.task-item.done .task-check { background: var(--sage); border-color: var(--sage); color: white; }
+.task-item.done .task-label { color: var(--smoke); text-decoration: line-through; }
+.task-label { flex: 1; color: var(--navy); }
+.task-action { font-size: 0.65rem; color: var(--gold-dim); cursor: pointer; text-decoration: underline; }
+
+/* PLAN SECTION CARD */
+.plan-sec-card {
+  border: 1.5px solid rgba(13,27,42,0.1);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+.plan-sec-card.filled { border-color: var(--sage); background: rgba(61,122,94,0.03); }
+.plan-sec-card.active { border-color: var(--gold); }
+.plan-sec-num  { font-size: 0.6rem; color: var(--gold-dim); font-weight: 700; margin-bottom: 4px; letter-spacing: 0.1em; }
+.plan-sec-title{ font-size: 0.88rem; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+.plan-sec-desc { font-size: 0.65rem; color: var(--warm); margin-bottom: 12px; }
+.plan-sec-fill { font-size: 0.65rem; color: var(--sage); }
+
+/* DOC UPLOAD */
+.doc-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px;
+  border: 1.5px solid rgba(13,27,42,0.1);
+  border-radius: var(--r);
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.doc-item.submitted { border-color: var(--sage); background: rgba(61,122,94,0.05); }
+.doc-icon { font-size: 1.4rem; flex-shrink: 0; }
+.doc-info { flex: 1; }
+.doc-name { font-size: 0.8rem; font-weight: 700; }
+.doc-req  { font-size: 0.62rem; color: var(--rust); font-weight: 700; }
+.doc-opt  { font-size: 0.62rem; color: var(--warm); }
+.doc-status { font-size: 0.7rem; color: var(--smoke); }
+.doc-item.submitted .doc-status { color: var(--sage); font-weight: 700; }
+.doc-btn {
+  padding: 7px 14px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(13,27,42,0.2);
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: var(--navy);
+  transition: all 0.15s;
+}
+.doc-item.submitted .doc-btn { background: var(--sage); color: white; border-color: var(--sage); }
+.doc-btn:hover { border-color: var(--gold); }
+
+/* CALC DISPLAY */
+.calc-result {
+  background: var(--navy);
+  color: var(--white);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-top: 14px;
+}
+.calc-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.75rem; }
+.calc-row b { color: var(--gold-lt); }
+.calc-divider { border-top: 1px solid rgba(201,168,76,0.2); margin: 8px 0; }
+
+/* STAGE BADGE */
+.stage-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(201,168,76,0.15);
+  color: var(--gold-dim);
+  font-size: 0.62rem; font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+}
+
+/* REGISTRATION HERO */
+.reg-hero {
+  text-align: center;
+  padding: 60px 40px 40px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.reg-hero-brand {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+}
+.reg-hero h1 {
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 1.9rem;
+  color: var(--navy);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.reg-hero p {
+  font-size: 0.82rem;
+  color: var(--warm);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.reg-box {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 32px;
+}
+.reg-timer {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 0.72rem; color: var(--warm); margin-bottom: 20px;
+}
+.reg-timer span { font-size: 1.2rem; font-weight: 700; color: var(--navy); }
+
+/* MYPAGE GRID */
+.mypage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.stat-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.stat-num   { font-size: 2rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.stat-unit  { font-size: 0.7rem; color: var(--warm); }
+.stat-label { font-size: 0.65rem; color: var(--smoke); margin-top: 4px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #main { margin-left: 0; }
+  .page { padding: 24px 18px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .option-cards { grid-template-columns: 1fr; }
+  .mypage-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── REGISTRATION PAGE ───────────────── -->
+<div id="reg-page" style="width:100%;min-height:100vh;background:var(--cream);display:none">
+  <div style="background:var(--navy);padding:14px 32px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:1rem;letter-spacing:0.15em">BRIDGE CYCLE</div>
+    <div style="font-size:0.65rem;color:var(--smoke)">創業者向けポータル</div>
+  </div>
+  <div class="reg-hero">
+    <div class="reg-hero-brand">BRIDGE CYCLE</div>
+    <h1>最短で、<br>次のテナントへ。</h1>
+    <p>物件決定前に、GATE診断・事業計画・融資の目処まで整える。<br>まず3分で登録して、あなたの開業への第一歩を踏み出しましょう。</p>
+    <div class="reg-box">
+      <div class="reg-timer">⏱ 所要時間 <span>約3分</span></div>
+      <div class="form-row">
+        <label class="form-label">お名前 <em>*</em></label>
+        <input type="text" id="reg-name" placeholder="例：田中 美咲">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">メールアドレス <em>*</em></label>
+          <input type="email" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="form-row">
+          <label class="form-label">電話番号</label>
+          <input type="tel" id="reg-tel" placeholder="090-0000-0000">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">希望エリア <em>*</em></label>
+          <select id="reg-area">
+            <option value="">選択してください</option>
+            <option>大津市</option><option>草津市</option><option>守山市</option>
+            <option>栗東市</option><option>近江八幡市</option><option>彦根市</option>
+            <option>長浜市</option><option>その他（滋賀県内）</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">希望業態 <em>*</em></label>
+          <select id="reg-business">
+            <option value="">選択してください</option>
+            <option>カフェ・喫茶</option><option>飲食（ランチ・テイクアウト）</option>
+            <option>飲食（夜・居酒屋）</option><option>ラーメン・麺類</option>
+            <option>中華・アジア料理</option><option>雑貨・セレクトショップ</option>
+            <option>美容・ネイル</option><option>その他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">自己資金帯 <em>*</em></label>
+          <select id="reg-capital">
+            <option value="">選択</option>
+            <option value="〜50万">〜50万円</option>
+            <option value="50〜100万">50〜100万円</option>
+            <option value="100〜300万">100〜300万円</option>
+            <option value="300万超">300万円超</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">開業希望時期 <em>*</em></label>
+          <select id="reg-timing">
+            <option value="">選択</option>
+            <option>3ヶ月以内</option><option>半年以内</option>
+            <option>1年以内</option><option>まだ未定</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">飲食・接客経験</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="reg-exp" value="あり（3年以上）"> あり（3年以上）</label>
+          <label class="radio-opt"><input type="radio" name="reg-exp" value="あり（〜3年）"> あり（〜3年）</label>
+          <label class="radio-opt"><input type="radio" name="reg-exp" value="なし"> なし</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">開業への思い（200字程度） <em>*</em></label>
+        <textarea id="reg-motivation" rows="3" placeholder="なぜ開業したいのか、どんなお店を作りたいのかを自由に書いてください。"></textarea>
+      </div>
+      <div style="font-size:0.62rem;color:var(--warm);margin-bottom:16px;line-height:1.7">
+        ※ 送信することで、BRIDGE CYCLEの<a href="#" style="color:var(--gold-dim)">利用規約</a>および<a href="#" style="color:var(--gold-dim)">プライバシーポリシー</a>に同意したものとみなされます。
+      </div>
+      <button class="btn btn-gold btn-full" onclick="submitRegistration()">登録して、次のステップへ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SIDEBAR ─────────────────────────── -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">BRIDGE CYCLE</div>
+    <div class="subtitle">創業者ワークスペース</div>
+  </div>
+  <div class="sidebar-user" id="sidebar-user">
+    <div class="user-avatar" id="avatar-initials">？</div>
+    <div>
+      <div class="user-name"  id="user-name-display">—</div>
+      <div class="user-stage" id="user-stage-display">未登録</div>
+    </div>
+  </div>
+  <div class="journey" id="journey-nav"></div>
+  <div class="sidebar-footer">
+    BRIDGE CYCLE 創業者専用<br>
+    入力内容は自動保存されます
+  </div>
+</aside>
+
+<!-- ─── MAIN ─────────────────────────────── -->
+<div id="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">マイページ</div>
+      <div class="topbar-stage" id="topbar-stage"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="autosave-status" class="save-status">●</div>
+      <button class="btn btn-sm btn-outline" onclick="resetSession()" style="font-size:0.62rem">ログアウト</button>
+    </div>
+  </div>
+
+  <!-- ── MYPAGE ────────────────────────── -->
+  <div class="page active" id="page-mypage">
+    <div class="sec-hd">
+      <h2>マイページ</h2>
+      <p>あなたの開業準備の現在地です。</p>
+    </div>
+    <div id="mypage-next-action"></div>
+    <div id="mypage-bc-comment"></div>
+    <div id="mypage-return-alert"></div>
+    <div class="mypage-grid" id="mypage-stats"></div>
+    <div class="panel" style="margin-top:20px">
+      <div class="panel-hd"><div class="panel-title">📋 タスクリスト</div></div>
+      <div class="panel-body"><ul class="task-list" id="task-list"></ul></div>
+    </div>
+  </div>
+
+  <!-- ── GATE ─────────────────────────── -->
+  <div class="page" id="page-gate">
+    <div class="sec-hd">
+      <h2>GATE 一次診断</h2>
+      <p>8つの質問に答えてください。あなたの開業準備状況を6つの軸で診断します。<br>回答は自動保存されます。</p>
+    </div>
+    <div id="gate-form-wrap"></div>
+  </div>
+
+  <!-- ── PLAN ─────────────────────────── -->
+  <div class="page" id="page-plan">
+    <div class="sec-hd">
+      <h2>事業計画フォーム</h2>
+      <p>9つのセクションを順番に記入してください。途中保存できます。<br>書き方のヒントがあるので、白紙から書く必要はありません。</p>
+    </div>
+    <div id="plan-progress-bar"></div>
+    <div id="plan-sections"></div>
+  </div>
+
+  <!-- ── DOCS ─────────────────────────── -->
+  <div class="page" id="page-docs">
+    <div class="sec-hd">
+      <h2>書類提出</h2>
+      <p>必要書類をアップロードしてください。必須書類3点を揃えると、BCのレビューに進みます。</p>
+    </div>
+    <div id="doc-list"></div>
+  </div>
+
+  <!-- ── RETURN ────────────────────────── -->
+  <div class="page" id="page-return">
+    <div class="sec-hd">
+      <h2>差戻し対応</h2>
+      <p>BCからの修正依頼を確認して、再提出してください。</p>
+    </div>
+    <div id="return-list"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  EMAIL 設定
+//  ① https://www.emailjs.com/ に無料登録
+//  ② Email Services → Gmail等を接続 → SERVICE_ID をコピー
+//  ③ Email Templates → 新規作成（変数: {{subject}} {{message}} {{to_email}} {{from_name}}）
+//     → TEMPLATE_ID をコピー
+//  ④ Account → Public Key をコピー
+// ════════════════════════════════════════
+const EMAIL_CFG = {
+  publicKey:  'YOUR_PUBLIC_KEY',          // ← EmailJS Public Key
+  serviceId:  'YOUR_SERVICE_ID',          // ← EmailJS Service ID
+  templateId: 'YOUR_TEMPLATE_ID',         // ← EmailJS Template ID
+  bcEmail:    'info@bridgecycleco.com',   // BC宛メール（変更不要）
+};
+
+// EmailJS 初期化（キー設定済みの場合のみ）
+if (!EMAIL_CFG.publicKey.startsWith('YOUR_')) {
+  emailjs.init({ publicKey: EMAIL_CFG.publicKey });
+}
+
+/**
+ * メール送信（EmailJS）
+ * 未設定時は mailto: フォールバック（メーラーが開く）
+ */
+async function sendEmail({ toEmail, subject, message, fromName = 'BRIDGE CYCLE 創業者ポータル' }) {
+  if (EMAIL_CFG.publicKey.startsWith('YOUR_')) {
+    // ── フォールバック：メーラーを開く ──────────────────
+    const body = encodeURIComponent(message);
+    const sub  = encodeURIComponent(subject);
+    window.open(`mailto:${toEmail}?subject=${sub}&body=${body}`, '_blank');
+    return { fallback: true };
+  }
+  // ── EmailJS 送信 ─────────────────────────────────────
+  return emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
+    to_email:  toEmail,
+    subject:   subject,
+    message:   message,
+    from_name: fromName,
+  });
+}
+
+/** BC宛通知メール */
+async function notifyBC(subject, lines) {
+  await sendEmail({
+    toEmail:  EMAIL_CFG.bcEmail,
+    subject:  `【BRIDGE CYCLE】${subject}`,
+    message:  lines.join('\n'),
+    fromName: '創業者ポータル（自動送信）',
+  });
+}
+
+/** 創業者宛確認メール */
+async function notifyFounder(toEmail, subject, lines) {
+  if (!toEmail) return;
+  await sendEmail({
+    toEmail,
+    subject:  `【BRIDGE CYCLE】${subject}`,
+    message:  lines.join('\n'),
+    fromName: 'BRIDGE CYCLE サポート',
+  });
+}
+
+// ════════════════════════════════════════
+//  DB
+// ════════════════════════════════════════
+const DB = {
+  load:    k => { try { return JSON.parse(localStorage.getItem('bc_' + k) || '[]'); } catch { return []; } },
+  save:    (k, d) => localStorage.setItem('bc_' + k, JSON.stringify(d)),
+  loadObj: k => { try { return JSON.parse(localStorage.getItem('bc_' + k) || '{}'); } catch { return {}; } },
+  saveObj: (k, d) => localStorage.setItem('bc_' + k, JSON.stringify(d)),
+  uid:     () => Math.random().toString(36).slice(2, 10),
+};
+
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let myId   = localStorage.getItem('bc_my_candidate_id');
+let myData = null;  // current tenant record
+
+const STAGES = [
+  { id: 'mypage',  label: 'マイページ',    sub: 'ホーム',         icon: '🏠', minSt: 0  },
+  { id: 'gate',    label: 'GATE一次診断', sub: '8問・約5分',      icon: '🎯', minSt: 1  },
+  { id: 'plan',    label: '事業計画',      sub: '9セクション',     icon: '📝', minSt: 3  },
+  { id: 'docs',    label: '書類提出',      sub: '必須3点',         icon: '📎', minSt: 5  },
+  { id: 'return',  label: '差戻し対応',    sub: 'BCフィードバック', icon: '↩️', minSt: 0  },
+];
+
+const PLAN_SECTIONS = [
+  { key: 'concept',      title: '事業概要',        desc: 'どんなお店を、どんな想いで作るのか',               field: 'text', placeholder: '例：地元の農家と連携した、旬の野菜が主役のランチカフェ。' },
+  { key: 'target',       title: '誰に何を売るか',  desc: '想定客層・来店動機・商圏を具体的に',               field: 'text', placeholder: '例：近隣の働く女性（30〜40代）を主なターゲットに、ランチ需要を取り込む。' },
+  { key: 'selling_point',title: '業態の特徴・強み', desc: '競合との差別化・独自性',                         field: 'text', placeholder: '例：完全国産食材の日替わりランチ。SNSで映えるプレート提供。' },
+  { key: 'monthly_sales',title: '月次売上計画',    desc: '席数・客単価・回転数・営業日数から算出',           field: 'calc', placeholder: '' },
+  { key: 'fixed_cost',   title: '固定費・人件費',   desc: '家賃・光熱費・人件費（自分の生活費も含む）',       field: 'cost', placeholder: '' },
+  { key: 'break_even',   title: '損益分岐計算',    desc: '月次収支がプラスになる売上ラインを確認',           field: 'auto', placeholder: '' },
+  { key: 'total_fund',   title: '必要開業資金',     desc: '物件取得・内装・設備・初期在庫・運転資金の合計',   field: 'fund', placeholder: '' },
+  { key: 'loan_amount',  title: '借入希望額・計画', desc: '創業融資の想定額・返済計画・担保有無',             field: 'text', placeholder: '例：日本政策金融公庫で300万円を希望。10年返済で月3万円の返済想定。' },
+  { key: 'risk_note',    title: 'リスクと打ち手',   desc: '想定リスクと、それに対する具体策',                field: 'text', placeholder: '例：競合のチェーン店が近い。→ 国産食材×SNS発信で差別化。雨天は仕込みを増やしテイクアウト強化。' },
+];
+
+const GATE_QUESTIONS = [
+  { key: 'motivation',    label: '開業の動機',          type: 'radio', opts: ['明確で強い（長年の夢、具体的な計画あり）', 'まあまあ（副業感覚・試してみたい）', 'まだ曖昧（とりあえず興味がある）'] },
+  { key: 'target',        label: '想定する客層',        type: 'text',  placeholder: '例：近隣オフィスの30〜40代女性。ランチ需要をメインに。' },
+  { key: 'price_range',   label: '想定客単価（昼）',    type: 'radio', opts: ['〜800円', '800〜1,500円', '1,500〜3,000円', '3,000円以上'] },
+  { key: 'exp_detail',    label: '飲食・接客経験の詳細', type: 'text',  placeholder: '例：居酒屋でアルバイト3年、調理補助経験あり。調理師免許は未取得。' },
+  { key: 'capital_status',label: '自己資金の準備状況',  type: 'radio', opts: ['既に手元にある', '預金口座に貯まっている', '親族からの援助予定', 'まだこれから貯める'] },
+  { key: 'family',        label: '家族の理解・協力',    type: 'radio', opts: ['全面的に賛成・協力してくれる', '概ね理解してもらっている', '反対はされていないが不安視されている', 'まだ相談できていない'] },
+  { key: 'hours',         label: '週あたりの投入可能時間', type: 'radio', opts: ['60時間以上（専業でやる）', '40〜60時間', '20〜40時間（現職と並行）', '20時間未満'] },
+  { key: 'property_cond', label: '希望物件の条件',      type: 'text',  placeholder: '例：大津市内・路面・〜20坪・厨房設備あり・飲食可・月賃料15万円以内。' },
+];
+
+const DOC_LIST = [
+  { key: 'id_card',      icon: '🪪', name: '身分証明書',         req: true,  desc: '運転免許証・マイナンバーカード等（両面）' },
+  { key: 'resume',       icon: '📄', name: '職務経歴書',         req: true,  desc: '直近3年分・飲食経験がある場合は詳しく記載' },
+  { key: 'capital_proof',icon: '🏦', name: '自己資金確認資料',   req: true,  desc: '通帳の写し（直近3ヶ月分）' },
+  { key: 'estimate',     icon: '📋', name: '見積書',             req: false, desc: '内装・設備等の見積書（あれば）' },
+  { key: 'license',      icon: '📜', name: '資格証明書',         req: false, desc: '調理師免許・食品衛生責任者等（あれば）' },
+  { key: 'other',        icon: '📁', name: 'その他資料',         req: false, desc: '事業に関連する参考資料など' },
+];
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+function init() {
+  if (!myId) {
+    showRegPage();
+    return;
+  }
+  const tenants = DB.load('tenants');
+  myData = tenants.find(t => t.id === myId);
+  if (!myData) { showRegPage(); return; }
+  showWorkspace();
+}
+
+function showRegPage() {
+  document.getElementById('reg-page').style.display = 'block';
+  document.getElementById('sidebar').style.display  = 'none';
+  document.getElementById('main').style.display     = 'none';
+}
+
+function showWorkspace() {
+  document.getElementById('reg-page').style.display = 'none';
+  document.getElementById('sidebar').style.display  = '';
+  document.getElementById('main').style.display     = '';
+  updateSidebar();
+  showPage('mypage');
+}
+
+// ════════════════════════════════════════
+//  REGISTRATION
+// ════════════════════════════════════════
+function submitRegistration() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const area     = document.getElementById('reg-area').value;
+  const business = document.getElementById('reg-business').value;
+  const capital  = document.getElementById('reg-capital').value;
+  const timing   = document.getElementById('reg-timing').value;
+  const exp      = document.querySelector('input[name="reg-exp"]:checked')?.value || '';
+  const motive   = document.getElementById('reg-motivation').value.trim();
+
+  if (!name || !email || !area || !business || !capital || !timing || !motive) {
+    alert('＊印の項目をすべて入力してください。'); return;
+  }
+
+  const tenants  = DB.load('tenants');
+  const props    = DB.load('properties');
+  const propId   = props.length ? props[0].id : '';
+  const newId    = DB.uid();
+  const newTenant = {
+    id: newId,
+    name, email, tel: document.getElementById('reg-tel').value,
+    business, capital, area, timing,
+    type: 'jp',
+    experience: exp,
+    motivation: motive,
+    propertyId: propId,
+    st: '1',
+    gate: null,
+    gateAnswers: {},
+    plan: {},
+    docs: {},
+    returns: [],
+    interviewDecision: null,
+    note: '',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    consentAt: Date.now(),
+  };
+  tenants.push(newTenant);
+  DB.save('tenants', tenants);
+  myId   = newId;
+  myData = newTenant;
+  localStorage.setItem('bc_my_candidate_id', newId);
+  addLog('system', '新規登録', `${name} が3分登録を完了`, name);
+
+  // BC宛通知
+  notifyBC(`新規候補者登録 — ${name}`, [
+    `【新規候補者登録】`,
+    ``,
+    `お名前　　: ${name}`,
+    `メール　　: ${email}`,
+    `電話　　　: ${newTenant.tel || '未記入'}`,
+    `希望エリア: ${area}`,
+    `希望業態　: ${business}`,
+    `自己資金　: ${capital}`,
+    `開業希望　: ${timing}`,
+    `経験　　　: ${exp || '未記入'}`,
+    ``,
+    `志望理由:`,
+    motive,
+    ``,
+    `次ステップ: GATE一次診断フォームの送信をお待ちください。`,
+  ]);
+
+  // 創業者宛受付確認
+  notifyFounder(email, '受付完了 — 次のステップをご確認ください', [
+    `${name} 様`,
+    ``,
+    `BRIDGE CYCLE への登録が完了しました。`,
+    ``,
+    `次のステップ：`,
+    `GATE一次診断フォームにご回答ください。`,
+    `（創業者ワークスペース → GATE一次診断）`,
+    ``,
+    `ご不明な点はこちらまでご連絡ください。`,
+    `info@bridgecycleco.com`,
+  ]);
+
+  showWorkspace();
+}
+
+// ════════════════════════════════════════
+//  SIDEBAR & NAV
+// ════════════════════════════════════════
+function updateSidebar() {
+  if (!myData) return;
+  const initials = myData.name.slice(0, 2);
+  document.getElementById('avatar-initials').textContent  = initials;
+  document.getElementById('user-name-display').textContent = myData.name;
+  document.getElementById('user-stage-display').textContent = `ST${myData.st} — ${getStageLabel()}`;
+
+  const st = parseInt(myData.st) || 1;
+  const nav = document.getElementById('journey-nav');
+  nav.innerHTML = STAGES.map(s => {
+    const isDone   = s.id === 'gate' && st >= 4
+                  || s.id === 'plan' && st >= 7
+                  || s.id === 'docs' && st >= 9
+                  || false;
+    const isLocked = s.minSt > st && s.id !== 'return' && s.id !== 'mypage';
+    const cls = isDone ? 'done' : (isLocked ? 'locked' : '');
+    return `<div class="journey-item ${cls}" onclick="${isLocked ? '' : `showPage('${s.id}')`}">
+      <div class="journey-dot">${isDone ? '✓' : s.icon}</div>
+      <div class="journey-info">
+        <div class="journey-label">${s.label}</div>
+        <div class="journey-sub">${s.sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getStageLabel() {
+  const st = parseInt(myData?.st) || 1;
+  const map = {1:'登録完了',2:'一次確認中',3:'詳細入力のお願い',4:'事業計画入力中',
+               5:'資金計画確認中',6:'書類提出待ち',7:'BCレビュー中',8:'面談判断中',
+               9:'面談準備',10:'保留・見送り'};
+  return map[Math.min(st,10)] || '進行中';
+}
+
+// ════════════════════════════════════════
+//  PAGE ROUTING
+// ════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  const titles = { mypage:'マイページ', gate:'GATE一次診断', plan:'事業計画', docs:'書類提出', return:'差戻し対応' };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+  document.getElementById('topbar-stage').textContent = `ST${myData?.st||1} — ${getStageLabel()}`;
+
+  if (id === 'mypage') renderMyPage();
+  if (id === 'gate')   renderGatePage();
+  if (id === 'plan')   renderPlanPage();
+  if (id === 'docs')   renderDocsPage();
+  if (id === 'return') renderReturnPage();
+}
+
+// ════════════════════════════════════════
+//  MYPAGE
+// ════════════════════════════════════════
+function renderMyPage() {
+  loadMyData();
+  const st = parseInt(myData.st) || 1;
+
+  // Next action
+  const nextMap = {
+    1: { icon:'🎯', text:'GATE一次診断に回答しましょう', sub:'8問・約5分。開業準備状況を診断します。', page:'gate' },
+    2: { icon:'⏳', text:'BCが確認中です（2営業日以内）', sub:'GATE一次診断フォームを確認しています。しばらくお待ちください。', page:null },
+    3: { icon:'📝', text:'事業計画フォームに記入しましょう', sub:'9つのセクションをステップで記入します。', page:'plan' },
+    4: { icon:'📝', text:'事業計画の入力を続けましょう', sub:`${countPlanSections()}セクション完了。続きを入力してください。`, page:'plan' },
+    5: { icon:'💰', text:'資金計画を入力しましょう', sub:'月次収支・損益分岐・開業資金を記入します。', page:'plan' },
+    6: { icon:'📎', text:'書類を提出しましょう', sub:'必須書類3点をアップロードしてください。', page:'docs' },
+    7: { icon:'⏳', text:'BCがレビュー中です（3営業日以内）', sub:'書類・計画を確認しています。差戻しがあれば連絡します。', page:null },
+    8: { icon:'🤝', text:'面談判断の連絡をお待ちください', sub:'BCからご連絡します。', page:null },
+    9: { icon:'🎉', text:'面談の準備をしてください', sub:'日時・場所・持参資料の確認をしましょう。', page:null },
+  };
+  const next = nextMap[Math.min(st, 9)] || nextMap[9];
+  document.getElementById('mypage-next-action').innerHTML = `
+    <div class="next-banner">
+      <div class="next-icon">${next.icon}</div>
+      <div>
+        <div class="next-label">▍ 次にやること</div>
+        <div class="next-text">${next.text}</div>
+        <div class="next-sub">${next.sub}</div>
+      </div>
+      ${next.page ? `<button class="next-btn" onclick="showPage('${next.page}')">始める →</button>` : ''}
+    </div>`;
+
+  // BC comment
+  const bcCmt = myData.bcComment || '';
+  document.getElementById('mypage-bc-comment').innerHTML = bcCmt
+    ? `<div class="bc-comment"><div class="bc-comment-label">💬 BCからのコメント</div><div class="bc-comment-text">${esc(bcCmt)}</div></div>` : '';
+
+  // Return alerts
+  const pendingReturns = (myData.returns || []).filter(r => r.status === 'pending');
+  document.getElementById('mypage-return-alert').innerHTML = pendingReturns.map(r => `
+    <div class="return-alert">
+      <div class="return-alert-hd">⚠️ <div class="return-alert-title">修正のお願い — ${esc(r.type)}</div></div>
+      <div class="return-alert-body">${esc(r.reason)}</div>
+      ${r.deadline ? `<div class="return-alert-deadline">修正期限：${esc(r.deadline)}</div>` : ''}
+      <button class="btn btn-sm btn-outline" style="margin-top:10px" onclick="showPage('return')">差戻し対応へ →</button>
+    </div>`).join('');
+
+  // Stats
+  const planDone = countPlanSections();
+  const docsDone = Object.values(myData.docs || {}).filter(v => v === 'submitted').length;
+  const gateScore = myData.gate ? GATE_AXES_IDS.reduce((s, k) => s + (parseInt(myData.gate[k]) || 0), 0) : null;
+  document.getElementById('mypage-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${planDone}<span style="font-size:1rem">/9</span></div><div class="stat-unit">セクション</div><div class="stat-label">事業計画の完成度</div></div>
+    <div class="stat-card"><div class="stat-num">${docsDone}</div><div class="stat-unit">点提出済み</div><div class="stat-label">書類提出（必須3点）</div></div>
+    ${gateScore !== null ? `<div class="stat-card"><div class="stat-num">${gateScore}<span style="font-size:1rem">/30</span></div><div class="stat-unit">点</div><div class="stat-label">GATEスコア（BC評価）</div></div>` : '<div class="stat-card"><div class="stat-num">—</div><div class="stat-label">GATE診断（BC評価待ち）</div></div>'}
+    <div class="stat-card"><div class="stat-num">ST${myData.st||1}</div><div class="stat-label">${getStageLabel()}</div></div>`;
+
+  // Tasks
+  const tasks = [
+    { label: '3分登録', done: true,  page: null },
+    { label: 'GATE一次診断の回答', done: !!(myData.gateAnswers && Object.keys(myData.gateAnswers).length >= 4), page: 'gate' },
+    { label: '事業計画（全9セクション）', done: planDone >= 9, page: 'plan' },
+    { label: '書類提出（必須3点）', done: docsDone >= 3, page: 'docs' },
+    { label: 'BCレビュー・差戻し対応', done: parseInt(myData.st) >= 9, page: 'return' },
+  ];
+  document.getElementById('task-list').innerHTML = tasks.map(t =>
+    `<li class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-check">${t.done ? '✓' : ''}</div>
+      <div class="task-label">${t.label}</div>
+      ${!t.done && t.page ? `<span class="task-action" onclick="showPage('${t.page}')">入力する</span>` : ''}
+    </li>`).join('');
+}
+
+const GATE_AXES_IDS = ['motivation', 'finance', 'fit', 'experience', 'plan', 'succession'];
+
+function countPlanSections() {
+  if (!myData.plan) return 0;
+  return PLAN_SECTIONS.filter(s => myData.plan[s.key] && String(myData.plan[s.key]).length > 0).length;
+}
+
+// ════════════════════════════════════════
+//  GATE
+// ════════════════════════════════════════
+function renderGatePage() {
+  loadMyData();
+  const ans = myData.gateAnswers || {};
+  const done = Object.keys(ans).filter(k => ans[k]).length;
+  const pct  = Math.round(done / GATE_QUESTIONS.length * 100);
+
+  let html = `<div style="font-size:0.75rem;color:var(--warm);margin-bottom:16px">BC担当者が一次確認に使います。正直に、できるだけ具体的に記入してください。</div>`;
+  html += `<div class="progress-wrap">
+    <div class="progress-hd"><span class="progress-label">${done} / ${GATE_QUESTIONS.length} 問回答済み</span><span class="progress-pct">${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+
+  GATE_QUESTIONS.forEach((q, i) => {
+    const saved = ans[q.key] || '';
+    html += `<div class="plan-sec-card ${saved ? 'filled' : ''}" id="gq-${i}">
+      <div class="plan-sec-num">Q${i+1}</div>
+      <div class="plan-sec-title">${q.label}</div>`;
+
+    if (q.type === 'radio') {
+      // onchange を各 input に直接付与（innerHTML 内の <script> は実行されないため）
+      html += `<div class="radio-group" style="margin-top:10px">` +
+        q.opts.map(opt =>
+          `<label class="radio-opt"><input type="radio" name="gq-${i}" value="${esc(opt)}"
+            onchange="saveGateAnswer('${q.key}', this.value)"
+            ${saved === opt ? 'checked' : ''}> ${esc(opt)}</label>`
+        ).join('') + '</div>';
+    } else {
+      html += `<textarea rows="2" placeholder="${esc(q.placeholder)}"
+        oninput="saveGateAnswer('${q.key}', this.value)"
+        style="margin-top:10px">${esc(saved)}</textarea>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `<div class="btn-row">
+    <button class="btn btn-gold" onclick="submitGate()">✅ 送信してBCに確認を依頼する</button>
+    <button class="btn btn-outline" onclick="autoSave()">下書き保存</button>
+  </div>`;
+  document.getElementById('gate-form-wrap').innerHTML = html;
+}
+
+function saveGateAnswer(key, val) {
+  loadMyData();
+  if (!myData.gateAnswers) myData.gateAnswers = {};
+  myData.gateAnswers[key] = val;
+  saveMy();
+  setAutosave();
+}
+
+async function submitGate() {
+  loadMyData();
+  const ans = myData.gateAnswers || {};
+
+  // 送信前に画面上の最新入力値を確実に収集する
+  GATE_QUESTIONS.forEach((q, i) => {
+    if (q.type === 'radio') {
+      const checked = document.querySelector(`input[name="gq-${i}"]:checked`);
+      if (checked) ans[q.key] = checked.value;
+    } else {
+      const ta = document.querySelectorAll('#gate-form-wrap textarea')[
+        GATE_QUESTIONS.slice(0, i).filter(x => x.type !== 'radio').length
+      ];
+      if (ta && ta.value.trim()) ans[q.key] = ta.value.trim();
+    }
+  });
+  myData.gateAnswers = ans;
+  saveMy();
+
+  // Q1（動機ラジオ）と最低4問の回答を必須とする
+  const answered = GATE_QUESTIONS.filter(q => ans[q.key] && String(ans[q.key]).trim()).length;
+  if (!ans['motivation']) {
+    alert('Q1「開業の動機」を選択してください。'); return;
+  }
+  if (answered < 4) {
+    alert(`あと ${4 - answered} 問以上回答してから送信してください。`); return;
+  }
+
+  if (parseInt(myData.st) <= 2) updateSt('2');
+  addLog('candidate', 'GATE一次送信', `${myData.name} がGATE一次フォームを提出（${answered}問回答）`);
+
+  // BC宛通知
+  const gateLines = [
+    `【GATE一次診断 提出】`,
+    ``,
+    `候補者: ${myData.name}（${myData.email}）`,
+    `希望業態: ${myData.business || '未記入'} / エリア: ${myData.area || '未記入'}`,
+    `自己資金: ${myData.capital || '未記入'} / 開業希望: ${myData.timing || '未記入'}`,
+    ``,
+    `─ 回答内容（${answered}問）─`,
+  ];
+  GATE_QUESTIONS.forEach(q => {
+    if (ans[q.key]) gateLines.push(`▸ ${q.label}: ${ans[q.key]}`);
+  });
+  gateLines.push(``, `▶ 確認ページ: 管理画面 → GATE評価 からご確認ください。`);
+  await notifyBC(`GATE一次診断 提出 — ${myData.name}`, gateLines);
+
+  // 創業者宛確認
+  await notifyFounder(myData.email, 'GATE一次診断を受付しました', [
+    `${myData.name} 様`,
+    ``,
+    `GATE一次診断の送信ありがとうございます。`,
+    `BCスタッフが2営業日以内に確認し、次のステップをご案内します。`,
+    ``,
+    `ご質問はこちらまで: info@bridgecycleco.com`,
+  ]);
+
+  alert('✅ GATE一次診断を送信しました。BCが2営業日以内に確認します。');
+  showPage('mypage');
+}
+
+// ════════════════════════════════════════
+//  BUSINESS PLAN
+// ════════════════════════════════════════
+function renderPlanPage() {
+  loadMyData();
+  const plan = myData.plan || {};
+  const done = PLAN_SECTIONS.filter(s => plan[s.key] && String(plan[s.key]).length > 0).length;
+  const pct  = Math.round(done / PLAN_SECTIONS.length * 100);
+
+  document.getElementById('plan-progress-bar').innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-hd"><span class="progress-label">${done} / ${PLAN_SECTIONS.length} セクション完了</span><span class="progress-pct">${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+
+  let html = '';
+  PLAN_SECTIONS.forEach((sec, i) => {
+    const val     = plan[sec.key];
+    const filled  = val && String(val).length > 0;
+
+    if (sec.field === 'calc') {
+      const seats   = parseInt(plan.seats)   || 0;
+      const spend   = parseInt(plan.spend)   || 0;
+      const turns   = parseFloat(plan.turns) || 0;
+      const opDays  = parseInt(plan.opdays)  || 0;
+      const monthly = seats * spend * turns * opDays;
+      html += `<div class="plan-sec-card ${filled?'filled':''}" id="psec-${i}">
+        <div class="plan-sec-num">SECTION ${i+1}</div>
+        <div class="plan-sec-title">${sec.title}</div>
+        <div class="plan-sec-desc">${sec.desc}</div>
+        <div class="form-grid">
+          <div class="form-row"><label class="form-label">席数</label><input type="number" value="${plan.seats||''}" placeholder="例：18" onchange="savePlan('seats',this.value);calcSales()"></div>
+          <div class="form-row"><label class="form-label">客単価（昼/円）</label><input type="number" value="${plan.spend||''}" placeholder="例：1200" onchange="savePlan('spend',this.value);calcSales()"></div>
+          <div class="form-row"><label class="form-label">回転数（昼/日）</label><input type="number" step="0.5" value="${plan.turns||''}" placeholder="例：1.5" onchange="savePlan('turns',this.value);calcSales()"></div>
+          <div class="form-row"><label class="form-label">営業日数（月）</label><input type="number" value="${plan.opdays||''}" placeholder="例：24" onchange="savePlan('opdays',this.value);calcSales()"></div>
+        </div>
+        <div class="calc-result" id="calc-sales-result">
+          <div class="calc-row"><span>月次売上試算</span><b>${monthly ? monthly.toLocaleString() + ' 円/月' : '上記を入力すると自動計算されます'}</b></div>
+        </div>
+        <div class="form-row" style="margin-top:12px"><label class="form-label">夜の売上・その他収入（あれば）</label><input type="text" value="${esc(plan.monthly_other||'')}" placeholder="例：テイクアウトで月5万円" onchange="savePlan('monthly_other',this.value)"></div>
+      </div>`;
+    } else if (sec.field === 'cost') {
+      const rent   = parseInt(plan.rent)   || 0;
+      const util   = parseInt(plan.util)   || 0;
+      const labor  = parseInt(plan.labor)  || 0;
+      const other  = parseInt(plan.other_cost) || 0;
+      const total  = rent + util + labor + other;
+      html += `<div class="plan-sec-card ${filled?'filled':''}" id="psec-${i}">
+        <div class="plan-sec-num">SECTION ${i+1}</div>
+        <div class="plan-sec-title">${sec.title}</div>
+        <div class="plan-sec-desc">${sec.desc}</div>
+        <div class="form-grid">
+          <div class="form-row"><label class="form-label">家賃（月/円）</label><input type="number" value="${plan.rent||''}" placeholder="例：120000" onchange="savePlan('rent',this.value);calcCost()"></div>
+          <div class="form-row"><label class="form-label">光熱費（月/円）</label><input type="number" value="${plan.util||''}" placeholder="例：30000" onchange="savePlan('util',this.value);calcCost()"></div>
+          <div class="form-row"><label class="form-label">人件費（月/円）</label><input type="number" value="${plan.labor||''}" placeholder="例：150000" onchange="savePlan('labor',this.value);calcCost()"></div>
+          <div class="form-row"><label class="form-label">その他固定費（月/円）</label><input type="number" value="${plan.other_cost||''}" placeholder="例：20000" onchange="savePlan('other_cost',this.value);calcCost()"></div>
+        </div>
+        <div class="calc-result" id="calc-cost-result">
+          <div class="calc-row"><span>固定費合計（月）</span><b>${total ? total.toLocaleString() + ' 円' : '上記を入力'}</b></div>
+        </div>
+      </div>`;
+    } else if (sec.field === 'auto') {
+      const monthly = calcMonthly();
+      const cogsRate = parseFloat(plan.cogs_rate) || 0;
+      const fixedTotal = (parseInt(plan.rent)||0) + (parseInt(plan.util)||0) + (parseInt(plan.labor)||0) + (parseInt(plan.other_cost)||0);
+      const breakEven  = cogsRate < 100 ? Math.round(fixedTotal / ((100 - cogsRate) / 100)) : 0;
+      html += `<div class="plan-sec-card ${filled?'filled':''}" id="psec-${i}">
+        <div class="plan-sec-num">SECTION ${i+1}</div>
+        <div class="plan-sec-title">${sec.title}</div>
+        <div class="plan-sec-desc">${sec.desc}</div>
+        <div class="form-row"><label class="form-label">原価率（%）</label><input type="number" step="1" max="100" value="${plan.cogs_rate||''}" placeholder="例：35" onchange="savePlan('cogs_rate',this.value);calcBreakEven()"></div>
+        <div class="calc-result" id="calc-be-result">
+          <div class="calc-row"><span>月次売上試算</span><b>${monthly ? monthly.toLocaleString() + ' 円' : '§4を先に入力'}</b></div>
+          <div class="calc-row"><span>固定費合計</span><b>${fixedTotal ? fixedTotal.toLocaleString() + ' 円' : '§5を先に入力'}</b></div>
+          <div class="calc-divider"></div>
+          <div class="calc-row"><span>損益分岐売上（月）</span><b>${breakEven ? breakEven.toLocaleString() + ' 円' : '原価率を入力'}</b></div>
+          <div class="calc-row"><span>収支見通し</span><b style="color:${monthly >= breakEven && breakEven > 0 ? '#80CBC4' : '#EF9A9A'}">${monthly && breakEven ? (monthly >= breakEven ? '✅ 黒字見込み' : '⚠ 赤字リスク') : '—'}</b></div>
+        </div>
+      </div>`;
+    } else if (sec.field === 'fund') {
+      const interior = parseInt(plan.fund_interior)||0;
+      const equip    = parseInt(plan.fund_equip)   ||0;
+      const stock    = parseInt(plan.fund_stock)   ||0;
+      const running  = parseInt(plan.fund_running) ||0;
+      const misc     = parseInt(plan.fund_misc)    ||0;
+      const total    = interior + equip + stock + running + misc;
+      html += `<div class="plan-sec-card ${filled?'filled':''}" id="psec-${i}">
+        <div class="plan-sec-num">SECTION ${i+1}</div>
+        <div class="plan-sec-title">${sec.title}</div>
+        <div class="plan-sec-desc">${sec.desc}</div>
+        <div class="form-grid">
+          <div class="form-row"><label class="form-label">内装工事費（円）</label><input type="number" value="${plan.fund_interior||''}" placeholder="例：2000000" onchange="savePlan('fund_interior',this.value);calcFund()"></div>
+          <div class="form-row"><label class="form-label">設備・厨房機器（円）</label><input type="number" value="${plan.fund_equip||''}" placeholder="例：800000" onchange="savePlan('fund_equip',this.value);calcFund()"></div>
+          <div class="form-row"><label class="form-label">初期在庫・消耗品（円）</label><input type="number" value="${plan.fund_stock||''}" placeholder="例：200000" onchange="savePlan('fund_stock',this.value);calcFund()"></div>
+          <div class="form-row"><label class="form-label">運転資金（3〜6ヶ月分/円）</label><input type="number" value="${plan.fund_running||''}" placeholder="例：900000" onchange="savePlan('fund_running',this.value);calcFund()"></div>
+          <div class="form-row"><label class="form-label">その他（円）</label><input type="number" value="${plan.fund_misc||''}" placeholder="例：300000" onchange="savePlan('fund_misc',this.value);calcFund()"></div>
+        </div>
+        <div class="calc-result" id="calc-fund-result">
+          <div class="calc-row"><span>必要資金合計</span><b>${total ? total.toLocaleString() + ' 円' : '上記を入力'}</b></div>
+          <div class="calc-row"><span>自己資金帯</span><b>${esc(myData.capital||'未設定')}</b></div>
+        </div>
+      </div>`;
+    } else {
+      html += `<div class="plan-sec-card ${filled?'filled':''}" id="psec-${i}">
+        <div class="plan-sec-num">SECTION ${i+1}</div>
+        <div class="plan-sec-title">${sec.title}</div>
+        <div class="plan-sec-desc">${sec.desc}</div>
+        ${filled ? `<div class="plan-sec-fill">✓ 記入済み</div>` : ''}
+        <textarea rows="4" placeholder="${esc(sec.placeholder)}" onchange="savePlan('${sec.key}',this.value)" style="margin-top:10px">${esc(val||'')}</textarea>
+      </div>`;
+    }
+  });
+
+  html += `<div class="btn-row">
+    <button class="btn btn-gold" onclick="submitPlan()">✅ 事業計画を送信する</button>
+    <button class="btn btn-outline" onclick="autoSave()">下書き保存</button>
+  </div>`;
+  document.getElementById('plan-sections').innerHTML = html;
+}
+
+function savePlan(key, val) {
+  loadMyData();
+  if (!myData.plan) myData.plan = {};
+  myData.plan[key] = val;
+  saveMy();
+  setAutosave();
+}
+
+function calcMonthly() {
+  const p = myData.plan || {};
+  return (parseInt(p.seats)||0) * (parseInt(p.spend)||0) * (parseFloat(p.turns)||0) * (parseInt(p.opdays)||0);
+}
+
+function calcSales() {
+  loadMyData();
+  const v = calcMonthly();
+  const el = document.getElementById('calc-sales-result');
+  if (el) el.innerHTML = `<div class="calc-row"><span>月次売上試算</span><b>${v ? v.toLocaleString() + ' 円/月' : '上記を入力'}</b></div>`;
+}
+
+function calcCost() {
+  loadMyData();
+  const p = myData.plan || {};
+  const t = (parseInt(p.rent)||0)+(parseInt(p.util)||0)+(parseInt(p.labor)||0)+(parseInt(p.other_cost)||0);
+  const el = document.getElementById('calc-cost-result');
+  if (el) el.innerHTML = `<div class="calc-row"><span>固定費合計（月）</span><b>${t ? t.toLocaleString() + ' 円' : '入力してください'}</b></div>`;
+}
+
+function calcBreakEven() {
+  loadMyData();
+  const p = myData.plan || {};
+  const monthly = calcMonthly();
+  const fixedT  = (parseInt(p.rent)||0)+(parseInt(p.util)||0)+(parseInt(p.labor)||0)+(parseInt(p.other_cost)||0);
+  const cogs    = parseFloat(p.cogs_rate) || 0;
+  const be      = cogs < 100 ? Math.round(fixedT / ((100 - cogs) / 100)) : 0;
+  const el = document.getElementById('calc-be-result');
+  if (el) el.innerHTML = `
+    <div class="calc-row"><span>月次売上試算</span><b>${monthly ? monthly.toLocaleString() + ' 円' : '§4を先に入力'}</b></div>
+    <div class="calc-row"><span>固定費合計</span><b>${fixedT ? fixedT.toLocaleString() + ' 円' : '§5を先に入力'}</b></div>
+    <div class="calc-divider"></div>
+    <div class="calc-row"><span>損益分岐売上</span><b>${be ? be.toLocaleString() + ' 円' : '原価率を入力'}</b></div>
+    <div class="calc-row"><span>収支見通し</span><b style="color:${monthly >= be && be > 0 ? '#80CBC4' : '#EF9A9A'}">${monthly && be ? (monthly >= be ? '✅ 黒字見込み' : '⚠ 赤字リスク') : '—'}</b></div>`;
+}
+
+function calcFund() {
+  loadMyData();
+  const p = myData.plan || {};
+  const t = (parseInt(p.fund_interior)||0)+(parseInt(p.fund_equip)||0)+(parseInt(p.fund_stock)||0)+(parseInt(p.fund_running)||0)+(parseInt(p.fund_misc)||0);
+  const el = document.getElementById('calc-fund-result');
+  if (el) el.innerHTML = `<div class="calc-row"><span>必要資金合計</span><b>${t ? t.toLocaleString() + ' 円' : '上記を入力'}</b></div><div class="calc-row"><span>自己資金帯</span><b>${esc(myData.capital||'未設定')}</b></div>`;
+}
+
+async function submitPlan() {
+  loadMyData();
+  const done = countPlanSections();
+  if (done < 6) { alert(`あと${6-done}セクション以上記入してから送信してください（最低6セクション）。`); return; }
+  if (parseInt(myData.st) <= 6) updateSt('7');
+  addLog('candidate', '事業計画送信', `${myData.name} が事業計画（${done}/9セクション）を送信`);
+
+  const p = myData.plan || {};
+  const monthly = calcMonthly();
+  await notifyBC(`事業計画 提出 — ${myData.name}`, [
+    `【事業計画 提出】`,
+    ``,
+    `候補者: ${myData.name}（${myData.email}）`,
+    `希望業態: ${myData.business || '—'} / エリア: ${myData.area || '—'}`,
+    `記入済みセクション: ${done}/9`,
+    ``,
+    `─ 計画サマリー ─`,
+    `事業概要: ${(p.concept || '未記入').slice(0, 80)}`,
+    `月次売上目標: ${monthly ? monthly.toLocaleString() + ' 円' : '未入力'}`,
+    `必要開業資金: ${p.total_fund ? Number(p.total_fund).toLocaleString() + ' 円' : '未入力'}`,
+    `借入希望: ${(p.loan_amount || '未記入').toString().slice(0, 60)}`,
+    ``,
+    `▶ 詳細は管理画面からご確認ください。`,
+  ]);
+
+  await notifyFounder(myData.email, '事業計画を受付しました', [
+    `${myData.name} 様`,
+    ``,
+    `事業計画の送信ありがとうございます。`,
+    `BCスタッフが3営業日以内に内容を確認します。`,
+    `追記・修正が必要な場合はご連絡します。`,
+    ``,
+    `ご質問はこちらまで: info@bridgecycleco.com`,
+  ]);
+
+  alert('✅ 事業計画を送信しました。BCが3営業日以内に確認します。');
+  showPage('mypage');
+}
+
+// ════════════════════════════════════════
+//  DOCUMENTS
+// ════════════════════════════════════════
+function renderDocsPage() {
+  loadMyData();
+  const docs = myData.docs || {};
+  const reqDone = ['id_card','resume','capital_proof'].filter(k => docs[k] === 'submitted').length;
+
+  let html = `<div style="background:var(--cream-dk);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;font-size:0.75rem;color:var(--warm)">
+    📎 必須書類（🔴）を3点提出すると、BCのレビューフェーズに進みます。現在 ${reqDone}/3点提出済み。
+  </div>`;
+
+  DOC_LIST.forEach(doc => {
+    const submitted = docs[doc.key] === 'submitted';
+    html += `<div class="doc-item ${submitted ? 'submitted' : ''}" id="doc-${doc.key}">
+      <div class="doc-icon">${doc.icon}</div>
+      <div class="doc-info">
+        <div class="doc-name">${doc.name} <span class="${doc.req ? 'doc-req' : 'doc-opt'}">${doc.req ? '必須' : '任意'}</span></div>
+        <div style="font-size:0.65rem;color:var(--warm);margin-top:2px">${doc.desc}</div>
+        <div class="doc-status">${submitted ? '✅ 提出済み' : '未提出'}</div>
+      </div>
+      <button class="doc-btn" onclick="toggleDoc('${doc.key}')">${submitted ? '提出済み ✓' : 'アップロード'}</button>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:20px">
+    <button class="btn btn-gold" onclick="submitDocs()" style="${reqDone >= 3 ? '' : 'opacity:0.5'}">✅ 書類提出完了を申告する</button>
+    <div style="font-size:0.65rem;color:var(--warm);margin-top:8px">※ 必須3点が揃ってから申告してください。</div>
+  </div>`;
+  document.getElementById('doc-list').innerHTML = html;
+}
+
+function toggleDoc(key) {
+  loadMyData();
+  if (!myData.docs) myData.docs = {};
+  const current = myData.docs[key];
+  myData.docs[key] = current === 'submitted' ? null : 'submitted';
+  saveMy();
+  renderDocsPage();
+  if (parseInt(myData.st) <= 5) updateSt('6');
+}
+
+async function submitDocs() {
+  loadMyData();
+  const docs = myData.docs || {};
+  const reqDone = ['id_card','resume','capital_proof'].filter(k => docs[k] === 'submitted').length;
+  const optDone = ['estimate','license','other'].filter(k => docs[k] === 'submitted').length;
+  if (reqDone < 3) { alert('必須書類（身分証・職歴・自己資金確認）の3点を揃えてから申告してください。'); return; }
+  if (parseInt(myData.st) <= 7) updateSt('7');
+  addLog('candidate', '書類提出申告', `${myData.name} が書類提出完了を申告（${reqDone}/3必須）`);
+
+  await notifyBC(`書類提出完了 — ${myData.name}`, [
+    `【書類提出完了】`,
+    ``,
+    `候補者: ${myData.name}（${myData.email}）`,
+    `希望業態: ${myData.business || '—'} / エリア: ${myData.area || '—'}`,
+    ``,
+    `提出書類:`,
+    `  必須: ${reqDone}/3点 ✅`,
+    `  任意: ${optDone}/3点`,
+    ``,
+    `▶ BCレビューをお願いします。管理画面からご確認ください。`,
+  ]);
+
+  await notifyFounder(myData.email, '書類提出を受付しました', [
+    `${myData.name} 様`,
+    ``,
+    `書類提出の申告を受付しました。`,
+    `BCスタッフが確認次第、ご連絡いたします。`,
+    ``,
+    `ご質問はこちらまで: info@bridgecycleco.com`,
+  ]);
+
+  alert('✅ 書類提出を申告しました。BCが確認します。');
+  showPage('mypage');
+}
+
+// ════════════════════════════════════════
+//  RETURN
+// ════════════════════════════════════════
+function renderReturnPage() {
+  loadMyData();
+  const returns = myData.returns || [];
+  if (!returns.length) {
+    document.getElementById('return-list').innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--smoke)"><div style="font-size:2.5rem;margin-bottom:12px">✅</div><div>現在、差戻しはありません。</div></div>`;
+    return;
+  }
+  let html = '';
+  returns.forEach((r, i) => {
+    html += `<div class="return-alert" style="margin-bottom:14px">
+      <div class="return-alert-hd">⚠️ <div class="return-alert-title">${esc(r.type)} ${r.status==='resolved' ? '（対応済み）' : ''}</div></div>
+      <div class="return-alert-body">${esc(r.reason)}</div>
+      ${r.deadline ? `<div class="return-alert-deadline">修正期限：${esc(r.deadline)}</div>` : ''}
+      <div style="margin-top:10px;font-size:0.65rem;color:var(--warm)">${fmtDate(r.createdAt)} に差戻し</div>
+      ${r.status !== 'resolved' ? `
+        <div style="margin-top:12px">
+          <label class="form-label">修正内容のメモ（任意）</label>
+          <textarea rows="2" id="re-note-${i}" placeholder="修正した内容を簡単にメモしてください">${esc(r.replyNote||'')}</textarea>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-gold btn-sm" onclick="resolveReturn(${i})">修正完了・再提出する</button>
+          <button class="btn btn-outline btn-sm" onclick="savePlanNote(${i})">メモ保存</button>
+        </div>` : '<div style="color:var(--sage);font-size:0.72rem;margin-top:8px">✅ 対応済み</div>'}
+    </div>`;
+  });
+  document.getElementById('return-list').innerHTML = html;
+}
+
+function savePlanNote(i) {
+  loadMyData();
+  const note = document.getElementById(`re-note-${i}`)?.value || '';
+  if (!myData.returns[i]) return;
+  myData.returns[i].replyNote = note;
+  saveMy();
+  alert('メモを保存しました。');
+}
+
+async function resolveReturn(i) {
+  loadMyData();
+  if (!myData.returns[i]) return;
+  const ret = myData.returns[i];
+  const replyNote = document.getElementById(`re-note-${i}`)?.value || '';
+  ret.status     = 'resolved';
+  ret.replyNote  = replyNote;
+  ret.resolvedAt = Date.now();
+  saveMy();
+  addLog('candidate', '差戻し対応', `${myData.name} が差戻し（${ret.type}）に対応・再提出`);
+
+  await notifyBC(`差戻し対応・再提出 — ${myData.name}`, [
+    `【差戻し対応・再提出】`,
+    ``,
+    `候補者: ${myData.name}（${myData.email}）`,
+    `差戻し区分: ${ret.type}`,
+    `元の差戻し理由: ${ret.reason}`,
+    ``,
+    `候補者からの修正メモ:`,
+    replyNote || '（メモなし）',
+    ``,
+    `▶ 管理画面から再確認をお願いします。`,
+  ]);
+
+  renderReturnPage();
+  alert('✅ 再提出しました。BCが再確認します。');
+}
+
+// ════════════════════════════════════════
+//  DATA HELPERS
+// ════════════════════════════════════════
+function loadMyData() {
+  const tenants = DB.load('tenants');
+  myData = tenants.find(t => t.id === myId) || myData;
+}
+function saveMy() {
+  if (!myData) return;
+  myData.updatedAt = Date.now();
+  const tenants = DB.load('tenants');
+  const idx = tenants.findIndex(t => t.id === myId);
+  if (idx >= 0) tenants[idx] = myData;
+  else tenants.push(myData);
+  DB.save('tenants', tenants);
+}
+function updateSt(st) {
+  loadMyData();
+  myData.st = st;
+  saveMy();
+  updateSidebar();
+}
+function autoSave() {
+  saveMy();
+  setAutosave('保存済み');
+}
+let saveTimer = null;
+function setAutosave(msg = '自動保存中…') {
+  const el = document.getElementById('autosave-status');
+  if (el) { el.textContent = msg; el.className = 'save-status' + (msg.includes('済') ? ' saved' : ''); }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { if (el) { el.textContent = '●'; el.className = 'save-status'; } }, 2000);
+}
+function addLog(actor, action, detail) {
+  const logs = DB.load('logs');
+  logs.push({ actor, action, detail, target: myData?.name||'', timestamp: Date.now() });
+  DB.save('logs', logs);
+}
+function resetSession() {
+  if (!confirm('ログアウトしますか？入力内容はサーバーに保存されています。')) return;
+  localStorage.removeItem('bc_my_candidate_id');
+  location.reload();
+}
+function fmtDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════
+//  START
+// ════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
