@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BC運用画面 | BRIDGE CYCLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:     #0D1B2A;
+  --navy-mid: #152336;
+  --navy-lt:  #1E3350;
+  --gold:     #C9A84C;
+  --gold-lt:  #E2C47A;
+  --gold-dim: #8A7040;
+  --cream:    #F7F2E8;
+  --cream-dk: #EDE6D4;
+  --smoke:    #C8BEAA;
+  --warm:     #7A6A52;
+  --rust:     #B85C38;
+  --sage:     #3D5A4C;
+  --white:    #FFFFFF;
+  --green:    #3D7A5E;
+  --red:      #B03030;
+  --amber:    #C47A1A;
+  --sidebar-w: 220px;
+  --r: 6px;
+  --shadow: 0 2px 12px rgba(13,27,42,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--cream);
+  color: var(--navy);
+  font-family: 'Noto Serif JP', serif;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ─── SIDEBAR ─────────────────────────────── */
+#sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.sidebar-logo .brand {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  font-size: 1.05rem;
+  letter-spacing: 0.15em;
+}
+.sidebar-logo .badge {
+  display: inline-block;
+  background: rgba(185,50,50,0.25);
+  color: #FF8A8A;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-top: 5px;
+  border: 1px solid rgba(185,50,50,0.4);
+}
+nav.sidebar-nav { flex: 1; padding: 14px 0; }
+.nav-section {
+  padding: 8px 20px 4px;
+  color: var(--gold-dim);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: var(--smoke);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.18s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover { background: rgba(201,168,76,0.08); color: var(--gold-lt); }
+.nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); border-left-color: var(--gold); }
+.nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--rust);
+  color: white;
+  font-size: 0.58rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.sidebar-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  color: var(--warm);
+  font-size: 0.58rem;
+  line-height: 1.8;
+}
+
+/* ─── MAIN ────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid rgba(13,27,42,0.08);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 6px rgba(13,27,42,0.06);
+}
+.topbar-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
+.topbar-meta { font-size: 0.7rem; color: var(--warm); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.admin-avatar {
+  width: 34px; height: 34px;
+  background: var(--navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+}
+
+.page { display: none; padding: 32px; }
+.page.active { display: block; }
+
+/* ─── KPI CARDS ──────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 20px 18px;
+  box-shadow: var(--shadow);
+  border-top: 3px solid transparent;
+}
+.kpi-card.gold  { border-top-color: var(--gold); }
+.kpi-card.blue  { border-top-color: #3B7DD8; }
+.kpi-card.green { border-top-color: var(--green); }
+.kpi-card.red   { border-top-color: var(--rust); }
+.kpi-label { font-size: 0.65rem; color: var(--warm); letter-spacing: 0.08em; margin-bottom: 6px; }
+.kpi-num   { font-size: 2rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.kpi-unit  { font-size: 0.7rem; color: var(--warm); margin-left: 2px; }
+.kpi-sub   { font-size: 0.62rem; color: var(--smoke); margin-top: 4px; }
+
+/* ─── PANEL ──────────────────────────────── */
+.panel {
+  background: var(--white);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+.panel-hd {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid rgba(13,27,42,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title { font-size: 0.85rem; font-weight: 700; color: var(--navy); }
+.panel-body  { padding: 20px; }
+
+/* ─── TABLE ──────────────────────────────── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.tbl th {
+  background: var(--navy);
+  color: var(--smoke);
+  font-size: 0.63rem;
+  letter-spacing: 0.1em;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+}
+.tbl td { padding: 10px 12px; border-bottom: 1px solid rgba(13,27,42,0.06); vertical-align: middle; }
+.tbl tr:hover td { background: rgba(201,168,76,0.05); }
+.tbl tr:last-child td { border-bottom: none; }
+
+/* ─── BADGES ─────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.badge-a { background: #E8F5E9; color: #2E7D32; }
+.badge-b { background: #E3F2FD; color: #1565C0; }
+.badge-c { background: #FFF8E1; color: #F57F17; }
+.badge-d { background: #FFEBEE; color: #B71C1C; }
+.badge-pending  { background: #F5F5F5; color: #616161; }
+.badge-review   { background: #E8EAF6; color: #283593; }
+.badge-returned { background: #FFF3E0; color: #E65100; }
+.badge-recommend { background: #E8F5E9; color: #2E7D32; }
+.badge-hold     { background: #FFF8E1; color: #F57F17; }
+.badge-reject   { background: #FFEBEE; color: #B71C1C; }
+
+.st-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.st-1,.st-2 { background: #9E9E9E; }
+.st-3       { background: #66BB6A; }
+.st-4       { background: #42A5F5; }
+.st-5,.st-6 { background: #FFA726; }
+.st-7,.st-8 { background: #EC407A; }
+.st-9       { background: #AB47BC; }
+
+/* ─── BUTTONS ────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--r);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; border: none; transition: all 0.18s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--navy); color: var(--gold); }
+.btn-primary:hover { background: var(--navy-lt); }
+.btn-gold    { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-lt); }
+.btn-outline { background: transparent; color: var(--navy); border: 1.5px solid rgba(13,27,42,0.2); }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold-dim); }
+.btn-sm { padding: 5px 11px; font-size: 0.68rem; }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { background: #8B2020; }
+.btn-green  { background: var(--green); color: white; }
+.btn-green:hover  { background: #2D5E48; }
+
+/* ─── GATE SCORING ───────────────────────── */
+.gate-score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.gate-axis {
+  background: var(--cream);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  border-left: 3px solid var(--gold-dim);
+}
+.gate-axis-label { font-size: 0.72rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.gate-axis-desc  { font-size: 0.62rem; color: var(--warm); margin-bottom: 10px; }
+.score-stars { display: flex; gap: 4px; }
+.star-btn {
+  width: 30px; height: 30px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(13,27,42,0.15);
+  background: var(--white);
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--smoke);
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.star-btn.selected { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+.gate-comment { width: 100%; margin-top: 8px; padding: 6px 8px; border: 1px solid rgba(13,27,42,0.12); border-radius: 4px; font-family: inherit; font-size: 0.68rem; resize: none; }
+
+.gate-total-bar {
+  background: var(--navy);
+  color: var(--white);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.gate-total-num { font-size: 2.4rem; font-weight: 700; color: var(--gold); }
+.gate-rank-badge {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 6px;
+}
+.rank-a { background: #2E7D32; color: white; }
+.rank-b { background: #1565C0; color: white; }
+.rank-c { background: #F57F17; color: white; }
+.rank-d { background: #B71C1C; color: white; }
+
+/* ─── RADAR CHART ────────────────────────── */
+.chart-wrap { position: relative; width: 220px; height: 220px; }
+
+/* ─── MODAL ──────────────────────────────── */
+.modal-bg {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(13,27,42,0.65);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--white);
+  border-radius: 10px;
+  width: min(700px, 96vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(13,27,42,0.3);
+}
+.modal-hd {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(13,27,42,0.08);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--white); z-index: 2;
+}
+.modal-title { font-size: 0.95rem; font-weight: 700; }
+.modal-close { cursor: pointer; font-size: 1.2rem; color: var(--warm); }
+.modal-close:hover { color: var(--navy); }
+.modal-body { padding: 20px 24px 24px; }
+
+/* ─── FORMS ──────────────────────────────── */
+.form-row { margin-bottom: 14px; }
+.form-label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--warm); margin-bottom: 5px; letter-spacing: 0.06em; }
+.form-label em { color: var(--rust); font-style: normal; margin-left: 3px; }
+input[type=text], input[type=date], select, textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid rgba(13,27,42,0.15);
+  border-radius: var(--r);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.78rem;
+  color: var(--navy);
+  background: var(--white);
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
+textarea { resize: vertical; min-height: 70px; }
+
+/* ─── INTERVIEW DECISION ──────────────────── */
+.decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.decision-btn {
+  padding: 18px;
+  border-radius: var(--r);
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+  font-family: 'Noto Serif JP', serif;
+}
+.decision-btn .d-icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+.decision-btn .d-label { font-size: 0.82rem; font-weight: 700; }
+.decision-btn .d-desc  { font-size: 0.62rem; color: var(--warm); margin-top: 4px; }
+.d-recommend { background: #E8F5E9; border-color: #C8E6C9; }
+.d-recommend:hover, .d-recommend.selected { background: #C8E6C9; border-color: #2E7D32; }
+.d-conditional { background: #E3F2FD; border-color: #BBDEFB; }
+.d-conditional:hover, .d-conditional.selected { background: #BBDEFB; border-color: #1565C0; }
+.d-hold { background: #FFF8E1; border-color: #FFECB3; }
+.d-hold:hover, .d-hold.selected { background: #FFECB3; border-color: #F57F17; }
+.d-reject { background: #FFEBEE; border-color: #FFCDD2; }
+.d-reject:hover, .d-reject.selected { background: #FFCDD2; border-color: #B71C1C; }
+
+/* ─── LOG ────────────────────────────────── */
+.log-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(13,27,42,0.06);
+  font-size: 0.72rem;
+}
+.log-item:last-child { border-bottom: none; }
+.log-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 4px; flex-shrink: 0;
+}
+.log-dot-bc  { background: var(--navy); }
+.log-dot-sys { background: var(--gold); }
+.log-dot-cand{ background: var(--green); }
+.log-time { color: var(--smoke); font-size: 0.62rem; min-width: 90px; }
+.log-action { color: var(--navy); }
+.log-detail { color: var(--warm); margin-top: 1px; }
+
+/* ─── RETURN PANEL ───────────────────────── */
+.return-item {
+  background: #FFF3E0;
+  border-left: 3px solid var(--rust);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.return-meta { font-size: 0.62rem; color: var(--warm); margin-bottom: 5px; }
+.return-reason { font-size: 0.78rem; font-weight: 700; }
+.return-items { font-size: 0.68rem; color: var(--navy); margin-top: 5px; }
+
+/* ─── STALE ALERT ────────────────────────── */
+.stale-row td { background: rgba(184,92,56,0.07) !important; }
+.stale-label { font-size: 0.6rem; color: var(--rust); font-weight: 700; }
+
+/* ─── COMPARISON GRID ────────────────────── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 200px repeat(auto-fill, minmax(200px, 1fr));
+  border: 1px solid rgba(13,27,42,0.1);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.compare-header { background: var(--navy); color: var(--gold); font-size: 0.72rem; font-weight: 700; padding: 10px 14px; }
+.compare-label  { background: var(--cream-dk); font-size: 0.68rem; font-weight: 700; color: var(--warm); padding: 9px 14px; border-bottom: 1px solid rgba(13,27,42,0.07); }
+.compare-cell   { font-size: 0.72rem; color: var(--navy); padding: 9px 14px; border-bottom: 1px solid rgba(13,27,42,0.07); border-left: 1px solid rgba(13,27,42,0.06); }
+.compare-cell.best { background: rgba(61,122,94,0.1); color: var(--green); font-weight: 700; }
+
+/* ─── EMPTY STATE ────────────────────────── */
+.empty { text-align: center; padding: 48px 20px; color: var(--smoke); }
+.empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-text { font-size: 0.82rem; }
+
+/* ─── SCORE BAR ──────────────────────────── */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar { flex: 1; height: 6px; background: rgba(13,27,42,0.08); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.3s; }
+.score-num { font-size: 0.7rem; font-weight: 700; color: var(--navy); min-width: 24px; text-align: right; }
+
+.section-sub { font-size: 0.68rem; color: var(--warm); margin-bottom: 16px; }
+.divider { border: none; border-top: 1px solid rgba(13,27,42,0.08); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─────────────────────────── -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">BRIDGE CYCLE</div>
+    <div class="badge">BC 運用専用画面</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">概要</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="icon">📊</span> ダッシュボード
+    </div>
+    <div class="nav-section">候補者管理</div>
+    <div class="nav-item" onclick="showPage('compare')">
+      <span class="icon">⚖️</span> 候補者比較
+    </div>
+    <div class="nav-item" id="nav-gate" onclick="showPage('gate')">
+      <span class="icon">🎯</span> GATE評価
+    </div>
+    <div class="nav-item" id="nav-return" onclick="showPage('return')">
+      <span class="icon">↩️</span> 差戻し管理
+      <span class="nav-badge" id="badge-return">0</span>
+    </div>
+    <div class="nav-section">判断</div>
+    <div class="nav-item" id="nav-interview" onclick="showPage('interview')">
+      <span class="icon">🤝</span> 面談判断
+      <span class="nav-badge" id="badge-interview">0</span>
+    </div>
+    <div class="nav-section">記録</div>
+    <div class="nav-item" onclick="showPage('log')">
+      <span class="icon">📋</span> 活動ログ
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    BRIDGE CYCLE 内部専用<br>
+    他社・外部への共有禁止
+  </div>
+</aside>
+
+<!-- ─── MAIN ─────────────────────────────── -->
+<div id="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">ダッシュボード</div>
+      <div class="topbar-meta" id="page-meta">全体KPI・案件進捗サマリー</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-meta" id="topbar-date"></div>
+      <div class="admin-avatar">BC</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">📌 案件別ステータス</div>
+          <button class="btn btn-sm btn-outline" onclick="renderDashboard()">更新</button>
+        </div>
+        <div class="panel-body" id="dash-cases"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">⚠️ 滞留中の案件（14日超）</div></div>
+        <div class="panel-body" id="dash-stale"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:0">
+      <div class="panel-hd"><div class="panel-title">🕐 最近の活動（直近10件）</div></div>
+      <div class="panel-body" id="dash-log"></div>
+    </div>
+  </div>
+
+  <!-- ══ COMPARE ══════════════════════════════ -->
+  <div class="page" id="page-compare">
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">案件を選択して候補者を比較</div>
+        <select id="compare-prop-sel" style="width:260px" onchange="renderCompare()">
+          <option value="">── 案件を選択 ──</option>
+        </select>
+      </div>
+      <div class="panel-body" id="compare-body">
+        <div class="empty"><div class="empty-icon">⚖️</div><div class="empty-text">案件を選択すると候補者を横並びで比較できます</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GATE ═════════════════════════════════ -->
+  <div class="page" id="page-gate">
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">候補者を選択してGATE評価を実施</div>
+        <select id="gate-cand-sel" style="width:300px" onchange="openGateEval()">
+          <option value="">── 候補者を選択 ──</option>
+        </select>
+      </div>
+      <div id="gate-eval-area"></div>
+    </div>
+  </div>
+
+  <!-- ══ RETURN ════════════════════════════════ -->
+  <div class="page" id="page-return">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">↩️ 差戻し発行</div>
+        </div>
+        <div class="panel-body">
+          <div class="form-row">
+            <label class="form-label">対象候補者 <em>*</em></label>
+            <select id="ret-cand-sel"></select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">差戻し区分 <em>*</em></label>
+            <select id="ret-type">
+              <option value="計画不備">事業計画の不備</option>
+              <option value="書類不足">提出書類の不足・不備</option>
+              <option value="GATE補足">GATE回答の補足が必要</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">差戻し理由（具体的に） <em>*</em></label>
+            <textarea id="ret-reason" rows="3" placeholder="例：売上計画の根拠が不明確です。席数・客単価・回転数の計算式を明示してください。"></textarea>
+          </div>
+          <div class="form-row">
+            <label class="form-label">修正期限</label>
+            <input type="date" id="ret-deadline">
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="issueReturn()">差戻しを発行する</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">📋 差戻し履歴・再提出状況</div>
+          <button class="btn btn-sm btn-outline" onclick="renderReturnPage()">更新</button>
+        </div>
+        <div class="panel-body" id="return-history"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INTERVIEW ══════════════════════════════ -->
+  <div class="page" id="page-interview">
+    <div style="display:grid;grid-template-columns:320px 1fr;gap:20px">
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">面談判断待ち候補者</div></div>
+        <div class="panel-body" id="interview-list" style="padding:0"></div>
+      </div>
+      <div class="panel" id="interview-detail">
+        <div class="panel-body">
+          <div class="empty"><div class="empty-icon">🤝</div><div class="empty-text">左のリストから候補者を選択してください</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOG ══════════════════════════════════ -->
+  <div class="page" id="page-log">
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">📋 活動ログ一覧</div>
+        <div style="display:flex;gap:8px">
+          <select id="log-filter" style="width:160px" onchange="renderLogPage()">
+            <option value="">全てのアクション</option>
+            <option value="GATE評価">GATE評価</option>
+            <option value="差戻し">差戻し</option>
+            <option value="面談判断">面談判断</option>
+            <option value="ステータス変更">ステータス変更</option>
+          </select>
+          <button class="btn btn-sm btn-outline" onclick="renderLogPage()">更新</button>
+        </div>
+      </div>
+      <div class="panel-body" id="log-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL ════════════════════════════════ -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title"></div>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  DB (共有 localStorage)
+// ════════════════════════════════════════
+const DB = {
+  load: k => { try { return JSON.parse(localStorage.getItem('bc_' + k) || '[]'); } catch { return []; } },
+  save: (k, d) => localStorage.setItem('bc_' + k, JSON.stringify(d)),
+  uid:  () => Math.random().toString(36).slice(2, 10),
+  loadObj: k => { try { return JSON.parse(localStorage.getItem('bc_' + k) || '{}'); } catch { return {}; } },
+  saveObj: (k, d) => localStorage.setItem('bc_' + k, JSON.stringify(d)),
+};
+
+// ────────────────────────────────────────
+const GATE_AXES = [
+  { id: 'motivation', label: '動機・コミット',      desc: '開業動機の強さ・継続意志' },
+  { id: 'finance',    label: '自己資金・調達余力',  desc: '資金量・返済能力' },
+  { id: 'fit',        label: '業態適合性',           desc: '業態×物件×客層の合致' },
+  { id: 'experience', label: '経験・スキル',         desc: '飲食・接客・経営実務' },
+  { id: 'plan',       label: '計画整合性',           desc: '収支数値の論理整合' },
+  { id: 'succession', label: '承継条件適合',         desc: '設備・スケジュール適合' },
+];
+
+const ST_LABELS = {
+  '1':'退去予兆登録', '2':'候補者募集開始', '3':'候補者受付中',
+  '4':'GATE一次判定中', '5':'詳細入力依頼中', '6':'事業計画整備中',
+  '7':'資金計画確認中', '8':'添付書類整備中', '9':'BCレビュー中',
+  '10':'面談判断', '11':'面談調整中', '12':'承継協議中',
+  '13':'成立', '14':'保留', '15':'見送り'
+};
+
+let radarChart = null;
+let currentGateCandId = null;
+let currentInterviewId = null;
+let gateScores = {};
+
+// ════════════════════════════════════════
+//  NAV & PAGE
+// ════════════════════════════════════════
+const PAGE_META = {
+  dashboard: ['ダッシュボード', '全体KPI・案件進捗サマリー'],
+  compare:   ['候補者比較',     '案件別に候補者を横並び比較'],
+  gate:      ['GATE評価',       '6軸スコアリング・総合判定'],
+  return:    ['差戻し管理',     '差戻し発行・再提出状況確認'],
+  interview: ['面談判断',       'BRIDGE CYCLE が最終判断を行う'],
+  log:       ['活動ログ',       '全操作履歴・監査記録'],
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const navs = document.querySelectorAll('.nav-item');
+  navs.forEach(n => { if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active'); });
+  const [title, meta] = PAGE_META[id] || [id, ''];
+  document.getElementById('page-title').textContent = title;
+  document.getElementById('page-meta').textContent  = meta;
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'compare')   populateCompareSel();
+  if (id === 'gate')      populateGateSel();
+  if (id === 'return')    renderReturnPage();
+  if (id === 'interview') renderInterviewPage();
+  if (id === 'log')       renderLogPage();
+}
+
+// ════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════
+function renderDashboard() {
+  const props   = DB.load('properties');
+  const tenants = DB.load('tenants');
+  const logs    = DB.load('logs');
+
+  // KPI
+  const total       = tenants.length;
+  const gateOk      = tenants.filter(t => t.gate && gateTotal(t.gate) >= 22).length;
+  const bcReview    = tenants.filter(t => parseInt(t.st) >= 9).length;
+  const success     = tenants.filter(t => t.st === '13').length;
+  const pending     = tenants.filter(t => t.st === '9').length;
+  const gateRate    = total ? Math.round(gateOk / total * 100) : 0;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card gold"><div class="kpi-label">候補者総数</div><div class="kpi-num">${total}<span class="kpi-unit">名</span></div><div class="kpi-sub">全ステータス含む</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">GATE一次通過者</div><div class="kpi-num">${gateOk}<span class="kpi-unit">名</span></div><div class="kpi-sub">通過率 ${gateRate}%（22点以上）</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">BCレビュー待ち</div><div class="kpi-num">${pending}<span class="kpi-unit">件</span></div><div class="kpi-sub">差戻し含む</div></div>
+    <div class="kpi-card green"><div class="kpi-label">承継成立</div><div class="kpi-num">${success}<span class="kpi-unit">件</span></div><div class="kpi-sub">PoC目標：1件</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">登録案件数</div><div class="kpi-num">${props.length}<span class="kpi-unit">件</span></div><div class="kpi-sub">空室・予兆含む</div></div>
+    <div class="kpi-card red"><div class="kpi-label">面談判断待ち</div><div class="kpi-num">${bcReview}<span class="kpi-unit">名</span></div><div class="kpi-sub">ST9以降</div></div>
+  `;
+  updateBadges(pending, bcReview);
+
+  // 案件別サマリー
+  let caseHtml = '';
+  if (!props.length) { caseHtml = '<div class="empty"><div class="empty-text">登録案件なし</div></div>'; }
+  else props.forEach(p => {
+    const cands = tenants.filter(t => t.propertyId === p.id);
+    caseHtml += `
+      <div style="padding:12px 0;border-bottom:1px solid rgba(13,27,42,0.07)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:0.8rem;font-weight:700">${esc(p.name)}</span>
+          <span style="font-size:0.62rem;color:var(--warm)">${cands.length}名</span>
+        </div>
+        <div style="font-size:0.65rem;color:var(--warm);margin-bottom:6px">${esc(p.address||'')} / ${esc(p.area||'?')}坪</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${cands.map(t => `<span class="badge ${gateRankClass(t)}">${esc(t.name.split(' ')[0]||t.name)} ST${t.st||1}</span>`).join('')}
+          ${!cands.length ? '<span style="font-size:0.62rem;color:var(--smoke)">候補者なし</span>' : ''}
+        </div>
+      </div>`;
+  });
+  document.getElementById('dash-cases').innerHTML = caseHtml;
+
+  // 滞留
+  const stale = tenants.filter(t => {
+    const d = (Date.now() - (t.updatedAt || t.createdAt || 0)) / 86400000;
+    return d > 14 && !['13','14','15'].includes(t.st);
+  });
+  let staleHtml = stale.length ? '' : '<div class="empty"><div class="empty-text">滞留案件なし</div></div>';
+  stale.forEach(t => {
+    const d = Math.floor((Date.now() - (t.updatedAt || t.createdAt || 0)) / 86400000);
+    staleHtml += `<div style="padding:10px 0;border-bottom:1px solid rgba(13,27,42,0.07);font-size:0.75rem">
+      <div style="display:flex;justify-content:space-between"><b>${esc(t.name)}</b><span class="stale-label">⚠ ${d}日滞留</span></div>
+      <div style="color:var(--warm);font-size:0.65rem;margin-top:2px">ST${t.st} — ${ST_LABELS[t.st]||'不明'}</div>
+    </div>`;
+  });
+  document.getElementById('dash-stale').innerHTML = staleHtml;
+
+  // ログ (直近10)
+  const recent = logs.slice(-10).reverse();
+  document.getElementById('dash-log').innerHTML = recent.length
+    ? recent.map(l => logItemHtml(l)).join('')
+    : '<div class="empty"><div class="empty-text">活動なし</div></div>';
+}
+
+// ════════════════════════════════════════
+//  COMPARE
+// ════════════════════════════════════════
+function populateCompareSel() {
+  const props = DB.load('properties');
+  const sel = document.getElementById('compare-prop-sel');
+  sel.innerHTML = '<option value="">── 案件を選択 ──</option>' +
+    props.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+}
+
+function renderCompare() {
+  const propId  = document.getElementById('compare-prop-sel').value;
+  const tenants = DB.load('tenants').filter(t => t.propertyId === propId);
+  const body    = document.getElementById('compare-body');
+  if (!propId) { body.innerHTML = '<div class="empty"><div class="empty-icon">⚖️</div><div class="empty-text">案件を選択してください</div></div>'; return; }
+  if (!tenants.length) { body.innerHTML = '<div class="empty"><div class="empty-text">この案件の候補者はまだいません</div></div>'; return; }
+
+  const rows = [
+    ['希望業態',       t => esc(t.business||'未記入')],
+    ['自己資金帯',     t => esc(t.capital||'未記入')],
+    ['飲食経験',       t => t.type === 'jp' ? '有' : '確認中'],
+    ['GATEスコア',     t => t.gate ? `${gateTotal(t.gate)}点` : '未評価'],
+    ['GATEランク',     t => t.gate ? `<span class="badge ${rankBadgeClass(gateTotal(t.gate))}">${gateRank(gateTotal(t.gate))}</span>` : '-'],
+    ['ステータス',     t => `ST${t.st||1} ${ST_LABELS[t.st]||''}`],
+    ['計画整備度',     t => planProgress(t)],
+    ['書類整備度',     t => docProgress(t)],
+    ['面談推奨',       t => interviewBadge(t)],
+  ];
+
+  // Find best gate score for highlighting
+  const scores = tenants.map(t => t.gate ? gateTotal(t.gate) : 0);
+  const maxScore = Math.max(...scores);
+
+  let html = '<div class="compare-grid" style="grid-template-columns:180px ' + tenants.map(()=>'1fr').join(' ') + '">';
+  // Header row
+  html += '<div class="compare-header">評価項目</div>' +
+    tenants.map(t => `<div class="compare-header">${esc(t.name)}<br><span style="font-size:0.62rem;opacity:0.7">ST${t.st||1}</span></div>`).join('');
+
+  rows.forEach(([label, fn]) => {
+    html += `<div class="compare-label">${label}</div>`;
+    tenants.forEach((t, i) => {
+      const val  = fn(t);
+      const best = label === 'GATEスコア' && scores[i] === maxScore && maxScore > 0;
+      html += `<div class="compare-cell ${best ? 'best' : ''}">${val}</div>`;
+    });
+  });
+  html += '</div>';
+  html += `<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">`;
+  tenants.forEach(t => {
+    html += `<button class="btn btn-sm btn-primary" onclick="openGateModal('${t.id}')">🎯 ${esc(t.name.split(' ')[0])} GATE評価</button>`;
+    html += `<button class="btn btn-sm btn-outline" onclick="openInterviewModal('${t.id}')">🤝 面談判断</button>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+// ════════════════════════════════════════
+//  GATE EVAL
+// ════════════════════════════════════════
+function populateGateSel() {
+  const tenants = DB.load('tenants');
+  const sel = document.getElementById('gate-cand-sel');
+  sel.innerHTML = '<option value="">── 候補者を選択 ──</option>' +
+    tenants.map(t => `<option value="${t.id}">${esc(t.name)} (ST${t.st||1}${t.gate ? ' / 評価済' : ''})</option>`).join('');
+}
+
+function openGateEval() {
+  const id = document.getElementById('gate-cand-sel').value;
+  if (!id) { document.getElementById('gate-eval-area').innerHTML = ''; return; }
+  openGateModal(id);
+}
+
+function openGateModal(id) {
+  const t = DB.load('tenants').find(x => x.id === id);
+  if (!t) return;
+  currentGateCandId = id;
+  gateScores = { ...(t.gate || {}) };
+
+  const total = gateTotal(gateScores);
+  const rank  = gateRank(total);
+
+  openModal(`GATE評価 — ${esc(t.name)}`, `
+    <div class="gate-total-bar">
+      <div>
+        <div style="font-size:0.65rem;color:var(--smoke);margin-bottom:4px">総合スコア</div>
+        <div><span class="gate-total-num" id="gt-score">${total}</span><span style="color:var(--smoke);font-size:0.85rem"> / 30点</span></div>
+        <div style="font-size:0.65rem;color:var(--smoke);margin-top:4px">22点以上：面談推奨</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:0.65rem;color:var(--smoke);margin-bottom:6px">総合判定</div>
+        <div class="gate-rank-badge rank-${rank.toLowerCase()}" id="gt-rank">${rank}</div>
+      </div>
+    </div>
+    <div class="gate-score-grid">
+      ${GATE_AXES.map(ax => `
+        <div class="gate-axis">
+          <div class="gate-axis-label">${ax.label}</div>
+          <div class="gate-axis-desc">${ax.desc}</div>
+          <div class="score-stars">
+            ${[1,2,3,4,5].map(n => `
+              <button class="star-btn ${(gateScores[ax.id]||0)>=n?'selected':''}"
+                      onclick="setScore('${ax.id}',${n})" data-axis="${ax.id}" data-n="${n}">${n}</button>
+            `).join('')}
+          </div>
+          <textarea class="gate-comment" id="gc-${ax.id}" rows="2" placeholder="コメント（任意）">${esc(t.gateComments?.[ax.id]||'')}</textarea>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:16px">
+      <label class="form-label">総合コメント</label>
+      <textarea id="gc-overall" rows="3" placeholder="総合的な評価コメント">${esc(t.gateOverall||'')}</textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-gold" style="flex:1" onclick="saveGate()">✅ 評価を保存</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+    </div>
+  `);
+}
+
+function setScore(axisId, n) {
+  gateScores[axisId] = n;
+  document.querySelectorAll(`[data-axis="${axisId}"]`).forEach(btn => {
+    btn.classList.toggle('selected', parseInt(btn.dataset.n) <= n);
+  });
+  const total = gateTotal(gateScores);
+  const rank  = gateRank(total);
+  document.getElementById('gt-score').textContent = total;
+  const rb = document.getElementById('gt-rank');
+  rb.textContent = rank;
+  rb.className = `gate-rank-badge rank-${rank.toLowerCase()}`;
+}
+
+function saveGate() {
+  if (!currentGateCandId) return;
+  const tenants = DB.load('tenants');
+  const idx = tenants.findIndex(t => t.id === currentGateCandId);
+  if (idx === -1) return;
+  const comments = {};
+  GATE_AXES.forEach(ax => { comments[ax.id] = document.getElementById('gc-' + ax.id)?.value || ''; });
+  tenants[idx].gate         = { ...gateScores };
+  tenants[idx].gateComments = comments;
+  tenants[idx].gateOverall  = document.getElementById('gc-overall')?.value || '';
+  tenants[idx].updatedAt    = Date.now();
+  if (parseInt(tenants[idx].st) <= 4) tenants[idx].st = '4';
+  DB.save('tenants', tenants);
+  addLog('BC', 'GATE評価', `${tenants[idx].name} の GATE評価を保存（${gateTotal(gateScores)}点）`);
+  closeModal();
+  populateGateSel();
+  alert(`✅ GATE評価を保存しました（${gateTotal(gateScores)}点 / ${gateRank(gateTotal(gateScores))}ランク）`);
+}
+
+// ════════════════════════════════════════
+//  RETURN
+// ════════════════════════════════════════
+function renderReturnPage() {
+  const tenants = DB.load('tenants');
+  const sel = document.getElementById('ret-cand-sel');
+  sel.innerHTML = tenants.map(t => `<option value="${t.id}">${esc(t.name)} (ST${t.st||1})</option>`).join('');
+
+  // 期限のデフォルト（7日後）
+  const d = new Date(Date.now() + 7*86400000);
+  document.getElementById('ret-deadline').value = d.toISOString().slice(0,10);
+
+  const logs = DB.load('logs').filter(l => l.action === '差戻し').reverse();
+  document.getElementById('return-history').innerHTML = logs.length
+    ? logs.map(l => `
+        <div class="return-item">
+          <div class="return-meta">${fmtDate(l.timestamp)} — ${esc(l.target)}</div>
+          <div class="return-reason">${esc(l.detail)}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-text">差戻し履歴なし</div></div>';
+  updateBadges();
+}
+
+function issueReturn() {
+  const candId = document.getElementById('ret-cand-sel').value;
+  const type   = document.getElementById('ret-type').value;
+  const reason = document.getElementById('ret-reason').value.trim();
+  const deadline = document.getElementById('ret-deadline').value;
+  if (!candId || !reason) { alert('候補者と差戻し理由は必須です。'); return; }
+  const tenants = DB.load('tenants');
+  const idx = tenants.findIndex(t => t.id === candId);
+  if (idx === -1) return;
+  const name = tenants[idx].name;
+  if (!tenants[idx].returns) tenants[idx].returns = [];
+  tenants[idx].returns.push({ type, reason, deadline, createdAt: Date.now(), status: 'pending' });
+  tenants[idx].updatedAt = Date.now();
+  DB.save('tenants', tenants);
+  addLog('BC', '差戻し', `${name}（${type}）${reason.slice(0,40)}...`);
+  document.getElementById('ret-reason').value = '';
+  renderReturnPage();
+  updateBadges();
+  alert(`✅ ${name} に差戻しを発行しました。`);
+}
+
+// ════════════════════════════════════════
+//  INTERVIEW
+// ════════════════════════════════════════
+function renderInterviewPage() {
+  const tenants = DB.load('tenants').filter(t => parseInt(t.st) >= 6 && !['13','14','15'].includes(t.st));
+  const list = document.getElementById('interview-list');
+  if (!tenants.length) {
+    list.innerHTML = '<div class="empty" style="padding:24px"><div class="empty-text">判断待ち候補者なし</div></div>';
+    document.getElementById('interview-detail').innerHTML = '<div class="panel-body"><div class="empty"><div class="empty-icon">🤝</div><div class="empty-text">候補者を選択してください</div></div></div>';
+    return;
+  }
+  list.innerHTML = tenants.map(t => `
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(13,27,42,0.07);cursor:pointer;transition:background 0.15s"
+         onclick="selectInterview('${t.id}')"
+         onmouseover="this.style.background='rgba(201,168,76,0.07)'"
+         onmouseout="this.style.background=''"
+         id="ilist-${t.id}">
+      <div style="font-size:0.8rem;font-weight:700;margin-bottom:3px">${esc(t.name)}</div>
+      <div style="font-size:0.65rem;color:var(--warm)">${esc(t.business||'業態未記入')}</div>
+      <div style="font-size:0.65rem;color:var(--smoke);margin-top:2px">ST${t.st} — ${ST_LABELS[t.st]||''}</div>
+      <div style="margin-top:6px">${t.interviewDecision ? interviewBadge(t) : '<span style="font-size:0.62rem;color:var(--rust)">●未判断</span>'}</div>
+    </div>`).join('');
+  updateBadges();
+}
+
+function selectInterview(id) {
+  currentInterviewId = id;
+  openInterviewModal(id);
+}
+
+function openInterviewModal(id) {
+  const t = DB.load('tenants').find(x => x.id === id);
+  if (!t) return;
+  currentInterviewId = id;
+  const total = t.gate ? gateTotal(t.gate) : null;
+  const rank  = total !== null ? gateRank(total) : null;
+
+  openModal(`面談判断 — ${esc(t.name)}`, `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+      <div style="background:var(--cream);border-radius:6px;padding:14px">
+        <div style="font-size:0.62rem;color:var(--warm);margin-bottom:8px">候補者プロフィール</div>
+        <div style="font-size:0.8rem;font-weight:700;margin-bottom:4px">${esc(t.name)}</div>
+        <div style="font-size:0.7rem;color:var(--navy)">${esc(t.business||'未記入')}</div>
+        <div style="font-size:0.65rem;color:var(--warm);margin-top:4px">ST${t.st||1} / ${ST_LABELS[t.st]||''}</div>
+      </div>
+      <div style="background:var(--cream);border-radius:6px;padding:14px">
+        <div style="font-size:0.62rem;color:var(--warm);margin-bottom:8px">GATEスコア</div>
+        ${total !== null
+          ? `<div style="font-size:2rem;font-weight:700;color:var(--navy)">${total}<span style="font-size:0.8rem;color:var(--smoke)"> / 30点</span></div>
+             <div style="margin-top:6px"><span class="badge ${rankBadgeClass(total)}">${rank}ランク</span> <span style="font-size:0.65rem;color:${total>=22?'var(--green)':'var(--rust)'}">${total>=22?'✅ 面談推奨圏内':'⚠ 基準未達'}</span></div>`
+          : '<div style="color:var(--smoke);font-size:0.78rem">未評価</div>'}
+        <div style="font-size:0.65rem;color:var(--warm);margin-top:4px">${t.gateOverall||''}</div>
+      </div>
+    </div>
+    ${GATE_AXES.filter(() => t.gate).map(ax => `
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:0.68rem;color:var(--warm)">${ax.label}</span>
+          <span style="font-size:0.68rem;font-weight:700">${t.gate?.[ax.id]||0} / 5</span>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar"><div class="score-bar-fill" style="width:${(t.gate?.[ax.id]||0)/5*100}%"></div></div>
+        </div>
+      </div>`).join('')}
+    <hr class="divider">
+    <div style="font-size:0.8rem;font-weight:700;margin-bottom:12px">面談判断を選択してください</div>
+    <div class="decision-grid">
+      <div class="decision-btn d-recommend ${t.interviewDecision==='recommend'?'selected':''}" onclick="selectDecision('recommend',this)">
+        <span class="d-icon">✅</span><div class="d-label">面談推奨</div><div class="d-desc">GATE通過・計画整備済み</div>
+      </div>
+      <div class="decision-btn d-conditional ${t.interviewDecision==='conditional'?'selected':''}" onclick="selectDecision('conditional',this)">
+        <span class="d-icon">🔵</span><div class="d-label">条件付き面談</div><div class="d-desc">補足確認の上で面談可</div>
+      </div>
+      <div class="decision-btn d-hold ${t.interviewDecision==='hold'?'selected':''}" onclick="selectDecision('hold',this)">
+        <span class="d-icon">⏸</span><div class="d-label">保留</div><div class="d-desc">次回案件・再申込みを案内</div>
+      </div>
+      <div class="decision-btn d-reject ${t.interviewDecision==='reject'?'selected':''}" onclick="selectDecision('reject',this)">
+        <span class="d-icon">❌</span><div class="d-label">見送り</div><div class="d-desc">GATE未達・計画不備</div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label class="form-label">判断メモ（管理会社への通知文）</label>
+      <textarea id="int-note" rows="3" placeholder="例：事業計画・資金計画ともに整備済みのため、面談を推奨します。">${esc(t.interviewNote||'')}</textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-gold" style="flex:1" onclick="saveInterview()">判断を確定する</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+    </div>
+  `);
+}
+
+let selectedDecision = null;
+function selectDecision(val, el) {
+  selectedDecision = val;
+  document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveInterview() {
+  if (!currentInterviewId || !selectedDecision) { alert('判断を選択してください'); return; }
+  const tenants = DB.load('tenants');
+  const idx = tenants.findIndex(t => t.id === currentInterviewId);
+  if (idx === -1) return;
+  const note = document.getElementById('int-note')?.value || '';
+  tenants[idx].interviewDecision = selectedDecision;
+  tenants[idx].interviewNote     = note;
+  tenants[idx].updatedAt = Date.now();
+  const stMap = { recommend: '11', conditional: '11', hold: '14', reject: '15' };
+  tenants[idx].st = stMap[selectedDecision] || tenants[idx].st;
+  DB.save('tenants', tenants);
+  const labelMap = { recommend:'面談推奨', conditional:'条件付き面談', hold:'保留', reject:'見送り' };
+  addLog('BC', '面談判断', `${tenants[idx].name} → ${labelMap[selectedDecision]}`);
+  closeModal();
+  renderInterviewPage();
+  updateBadges();
+  alert(`✅ 面談判断（${labelMap[selectedDecision]}）を確定しました。`);
+}
+
+// ════════════════════════════════════════
+//  LOG
+// ════════════════════════════════════════
+function renderLogPage() {
+  const filter = document.getElementById('log-filter')?.value || '';
+  let logs = DB.load('logs').reverse();
+  if (filter) logs = logs.filter(l => l.action === filter);
+  document.getElementById('log-body').innerHTML = logs.length
+    ? logs.map(l => logItemHtml(l)).join('')
+    : '<div class="empty"><div class="empty-text">ログなし</div></div>';
+}
+
+function logItemHtml(l) {
+  const dotClass = l.actor === 'BC' ? 'log-dot-bc' : l.actor === 'system' ? 'log-dot-sys' : 'log-dot-cand';
+  return `<div class="log-item">
+    <div class="st-dot log-dot ${dotClass}"></div>
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="log-action"><b>[${esc(l.action)}]</b> ${esc(l.detail||'')}</div>
+        <div class="log-time">${fmtDate(l.timestamp)}</div>
+      </div>
+      <div class="log-detail">${esc(l.actor||'')} → ${esc(l.target||'')}</div>
+    </div>
+  </div>`;
+}
+
+function addLog(actor, action, detail, target = '') {
+  const logs = DB.load('logs');
+  logs.push({ actor, action, detail, target, timestamp: Date.now() });
+  DB.save('logs', logs);
+}
+
+// ════════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════════
+function openModal(title, html) {
+  selectedDecision = null;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+  currentGateCandId = null;
+}
+document.getElementById('modal-bg').addEventListener('click', e => { if (e.target === document.getElementById('modal-bg')) closeModal(); });
+
+// ════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════
+function gateTotal(g) {
+  if (!g) return 0;
+  return GATE_AXES.reduce((s, ax) => s + (parseInt(g[ax.id]) || 0), 0);
+}
+function gateRank(score) {
+  if (score >= 25) return 'A';
+  if (score >= 22) return 'B';
+  if (score >= 18) return 'C';
+  return 'D';
+}
+function rankBadgeClass(score) {
+  const r = gateRank(score);
+  return `badge-${r.toLowerCase()}`;
+}
+function gateRankClass(t) {
+  if (!t.gate) return 'badge-pending';
+  return rankBadgeClass(gateTotal(t.gate));
+}
+function planProgress(t) {
+  if (!t.plan) return '未着手';
+  const sections = ['concept','target','selling_point','monthly_sales','cogs_rate','labor_cost','break_even','total_fund','loan_amount'];
+  const filled = sections.filter(k => t.plan[k]).length;
+  return `${filled}/9`;
+}
+function docProgress(t) {
+  if (!t.docs) return '未提出';
+  const required = ['id_card','resume','capital_proof'];
+  const ok = required.filter(k => t.docs[k] === 'submitted').length;
+  return `${ok}/3必須`;
+}
+function interviewBadge(t) {
+  const map = { recommend:'badge-recommend recommend:面談推奨', conditional:'badge-review 条件付き', hold:'badge-hold 保留', reject:'badge-reject 見送り' };
+  if (!t.interviewDecision) return '<span class="badge badge-pending">未判断</span>';
+  const [cls, label] = (map[t.interviewDecision]||'badge-pending 不明').split(' ');
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function updateBadges(pending, bcReview) {
+  const tenants = DB.load('tenants');
+  const p = pending ?? tenants.filter(t => t.st === '9').length;
+  const b = bcReview ?? tenants.filter(t => parseInt(t.st) >= 6 && !['13','14','15'].includes(t.st)).length;
+  const retBadge = document.getElementById('badge-return');
+  const intBadge = document.getElementById('badge-interview');
+  if (retBadge) { const r = tenants.filter(t => t.returns?.some(x => x.status === 'pending')).length; retBadge.textContent = r; retBadge.style.display = r ? '' : 'none'; }
+  if (intBadge) { intBadge.textContent = b; intBadge.style.display = b ? '' : 'none'; }
+}
+function fmtDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
+renderDashboard();
+updateBadges();
+</script>
+</body>
+</html>
